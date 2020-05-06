@@ -32,13 +32,15 @@ object frmReceber: TfrmReceber
     Properties.ActivePage = cxTSPrincipal
     Properties.CustomButtons.Buttons = <>
     LookAndFeel.NativeStyle = False
-    ClientRectBottom = 304
-    ClientRectLeft = 4
-    ClientRectRight = 922
-    ClientRectTop = 27
+    ClientRectBottom = 308
+    ClientRectRight = 926
+    ClientRectTop = 24
     object cxTSPrincipal: TcxTabSheet
       Caption = 'Principal'
       ImageIndex = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object DBEdit1: TDBEdit
         Left = 16
         Top = 24
@@ -93,15 +95,6 @@ object frmReceber: TfrmReceber
         DataSource = DM.dsReceber
         TabOrder = 5
       end
-      object DBEdit8: TDBEdit
-        Left = 156
-        Top = 104
-        Width = 160
-        Height = 21
-        DataField = 'STATUS'
-        DataSource = DM.dsReceber
-        TabOrder = 6
-      end
       object DBEdit10: TDBEdit
         Left = 322
         Top = 104
@@ -109,7 +102,7 @@ object frmReceber: TfrmReceber
         Height = 21
         DataField = 'NUMERO_CHEQUE'
         DataSource = DM.dsReceber
-        TabOrder = 7
+        TabOrder = 6
       end
       object cxLabel1: TcxLabel
         Left = 16
@@ -148,7 +141,7 @@ object frmReceber: TfrmReceber
         StyleHot.LookAndFeel.NativeStyle = False
       end
       object cxLabel5: TcxLabel
-        Left = 156
+        Left = 146
         Top = 86
         Caption = 'Status'
         Style.LookAndFeel.NativeStyle = False
@@ -190,7 +183,7 @@ object frmReceber: TfrmReceber
         Height = 21
         Caption = '...'
         LookAndFeel.NativeStyle = False
-        TabOrder = 16
+        TabOrder = 15
         OnClick = cxButton1Click
       end
       object DBEdit9: TDBEdit
@@ -200,7 +193,7 @@ object frmReceber: TfrmReceber
         Height = 21
         DataField = 'FORMA_PAGAMENTO'
         DataSource = DM.dsReceber
-        TabOrder = 17
+        TabOrder = 16
       end
       object cxLabel10: TcxLabel
         Left = 451
@@ -218,8 +211,22 @@ object frmReceber: TfrmReceber
         Height = 21
         Caption = '...'
         LookAndFeel.NativeStyle = False
-        TabOrder = 19
+        TabOrder = 18
         OnClick = cxButton2Click
+      end
+      object DBComboBox1: TDBComboBox
+        Left = 146
+        Top = 104
+        Width = 168
+        Height = 21
+        DataField = 'STATUS'
+        DataSource = DM.dsReceber
+        Items.Strings = (
+          'Aguardando recebimento'
+          'Titulo vencido'
+          'Titulo recebido'
+          'Titulo cancelado')
+        TabOrder = 19
       end
     end
   end
@@ -266,6 +273,7 @@ object frmReceber: TfrmReceber
         Width = 300
       end
       object cxGridReceberDBTableView1NOME_CLIENTE: TcxGridDBColumn
+        Caption = 'Nome Cliente'
         DataBinding.FieldName = 'NOME_CLIENTE'
         Width = 300
       end
@@ -277,10 +285,6 @@ object frmReceber: TfrmReceber
       object cxGridReceberDBTableView1VALOR_TITULO: TcxGridDBColumn
         Caption = 'Valor'
         DataBinding.FieldName = 'VALOR_TITULO'
-      end
-      object cxGridReceberDBTableView1Column1: TcxGridDBColumn
-        Caption = 'Forma de pagamento'
-        DataBinding.FieldName = 'FORMA_PAGAMENTO'
       end
     end
     object cxGridReceberLevel1: TcxGridLevel
@@ -300,8 +304,6 @@ object frmReceber: TfrmReceber
     Font.Style = []
     ParentFont = False
     TabOrder = 2
-    ExplicitLeft = 72
-    ExplicitTop = 296
     object spbConfirmarPagamento: TSpeedButton
       Left = 236
       Top = 1

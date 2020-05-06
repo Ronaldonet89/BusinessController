@@ -23,8 +23,8 @@ object frmSplash: TfrmSplash
     Height = 339
     Align = alClient
     Stretch = True
-    ExplicitWidth = 1600
-    ExplicitHeight = 1200
+    ExplicitLeft = -120
+    ExplicitTop = -8
   end
   object Timer1: TTimer
     Enabled = False

@@ -170,10 +170,10 @@ begin
     begin
       inc(vcontador);
       dm.cdsFormasVSCondicoes.Insert;
-      dm.cdsFormasVSCondicoesID_FORMA_DE_PAGAMENTO.Value := cdsVinculoID_FORMA_PAGAMENTO.AsInteger;
-      dm.cdsFormasVSCondicoesCONDICAO_DE_PAGAMENTO.Value := cdsVinculoCONDICAO_PAGAMENTO.AsString;
-      dm.cdsFormasVSCondicoesID_CONDICAO_DE_PAGAMENTO.Value := cdsVinculoID_CONDICAO_PAGAMENTO.AsInteger;
-      dm.cdsFormasVSCondicoesDESCRICAO_FORMA_DE_PAGAMENTO.Value := dm.cdsGenerico.FieldByName('DESCRICAO_FORMA_DE_PAGAMENTO').AsString;
+      dm.cdsFormasVSCondicoesID_FORMA_DE_PAGAMENTO.AsInteger := cdsVinculoID_FORMA_PAGAMENTO.AsInteger;
+      dm.cdsFormasVSCondicoesCONDICAO_DE_PAGAMENTO.AsString := cdsVinculoCONDICAO_PAGAMENTO.AsString;
+      dm.cdsFormasVSCondicoesID_CONDICAO_DE_PAGAMENTO.AsInteger := cdsVinculoID_CONDICAO_PAGAMENTO.AsInteger;
+      dm.cdsFormasVSCondicoesDESCRICAO_FORMA_DE_PAGAMENTO.AsString := dm.cdsGenerico.FieldByName('DESCRICAO_FORMA_DE_PAGAMENTO').AsString;
       dm.cdsFormasVSCondicoes.Post;
     end;
     cdsVinculo.Next;
@@ -245,9 +245,9 @@ begin
 end;
 
 procedure TfrmRelatorios.ImprimirRelatorioGerencial;
-var
-  vDataInicial,vDataFinal,vString : string;
-  vData : TDateTime;
+//var
+//  vDataInicial,vDataFinal,vString : string;
+//  vData : TDateTime;
 begin  {
   try
     vDataInicial := Trim(InputBox('Data inicial','Informe a data inicial'+#13+
@@ -388,8 +388,8 @@ begin
     while not dm.cdsGenerico.Eof do
     begin
       cdsVinculo.Append;
-      cdsVinculoCONDICAO_PAGAMENTO.Value := dm.cdsGenerico.FieldByName('condicao_de_pagamento').AsString;
-      cdsVinculoID_CONDICAO_PAGAMENTO.Value := dm.cdsGenerico.FieldByName('id_condicao_de_pagamento').AsInteger;
+      cdsVinculoCONDICAO_PAGAMENTO.AsString := dm.cdsGenerico.FieldByName('condicao_de_pagamento').AsString;
+      cdsVinculoID_CONDICAO_PAGAMENTO.AsInteger := dm.cdsGenerico.FieldByName('id_condicao_de_pagamento').AsInteger;
       cdsVinculoCONFIRMA.Value := 'N';
       cdsVinculoID_FORMA_PAGAMENTO.Value := qForma;
       cdsVinculo.Post;

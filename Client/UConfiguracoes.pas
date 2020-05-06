@@ -23,10 +23,13 @@ uses
   cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, cxNavigator, Data.DB,
   cxDBData, cxGridCustomTableView, cxGridTableView, cxGridDBTableView,
   cxGridLevel, cxClasses, cxGridCustomView, cxGrid, cxDBNavigator, Vcl.ComCtrls{,
+
   dxSkinMetropolis, dxSkinMetropolisDark, dxSkinOffice2013DarkGray,
   dxSkinOffice2013LightGray, dxSkinOffice2016Colorful, dxSkinOffice2016Dark,
   dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
-  dxSkinVisualStudio2013Light, dxBarBuiltInMenu};
+  dxSkinVisualStudio2013Light, dxBarBuiltInMenu}
+  ,XMLIntf, XMLDoc, zlib, Spin,ACBrBase, ACBrDFe,pcnConversaoNFe,
+  pcnConversao, ACBrUtil,ACBrDFeSSL,blcksock, System.UITypes;
 
 type
   TfrmConfiguracoes = class(TForm)
@@ -200,6 +203,20 @@ type
     edtAliqPis: TEdit;
     Label7: TLabel;
     EdtAliqCofins: TEdit;
+    lSSLLib: TLabel;
+    cbSSLLib: TComboBox;
+    lCryptLib: TLabel;
+    cbCryptLib: TComboBox;
+    lHttpLib: TLabel;
+    cbHttpLib: TComboBox;
+    lXmlSign: TLabel;
+    cbXmlSignLib: TComboBox;
+    cbSSLType: TComboBox;
+    lSSLLib1: TLabel;
+    cxGroupBox11: TcxGroupBox;
+    cbModeloDF: TComboBox;
+    cxGroupBox12: TcxGroupBox;
+    edtNumeroNFe: TEdit;
     procedure BackToMainForm(Sender: TObject);
     procedure CloseButtonClick(Sender: TObject);
     procedure Action1Execute(Sender: TObject);
@@ -259,7 +276,7 @@ implementation
 {$R *.dfm}
 
 uses GroupedItems1, SplitItemDetail1, ULogin, UDataModul, UProceduresClient,
-  UntConectaServidor, UntVendaBalcao,ACBrSATClass,pcnConversao,
+  UntConectaServidor, UntVendaBalcao,ACBrSATClass,
   typinfo;
 
 const
@@ -744,8 +761,8 @@ end;
 
 procedure TfrmConfiguracoes.cxBtnCancelarMovimentacaoPedidoClick(
   Sender: TObject);
-var
-  qNumeroPedido : Integer;
+//var
+ // qNumeroPedido : Integer;
 begin
   {
   try
@@ -830,6 +847,7 @@ begin
     frmLogin.sPathArq     := EdtArquivos.Text;
     try
       frmLogin.sUltNumNFe   := StrToInt(edtNumeroUltimaNFe.Text);
+      frmLogin.sNumNFe   := StrToInt(edtNumeroNFe.Text);
     except
       showmessage('Valor digitado no campo Ultimo numero NF-e é inválido');
       frmLogin.sUltNumNFe := 0;
@@ -1180,11 +1198,21 @@ end;
 
 procedure TfrmConfiguracoes.FormShow(Sender: TObject);
 var
-  I : TACBrSATModelo ;
+//  I : TACBrSATModelo ;
   J : TpcnTipoAmbiente ;
   K : TpcnRegTribISSQN ;
   L : TpcnindRatISSQN ;
   M : TpcnRegTrib ;
+
+  e : TSSLLib;
+//  q : TpcnTipoEmissao ;
+//  p : TpcnModeloDF;
+//  s : TpcnVersaoDF;
+
+  U : TSSLCryptLib;
+  V : TSSLHttpLib;
+  X : TSSLXmlSignLib;
+  Y : TSSLType;
 begin
 //  cbxModelo.Items.Clear ;
 //  For I := Low(TACBrSATModelo) to High(TACBrSATModelo) do
@@ -1205,6 +1233,44 @@ begin
   cbbRegTributario.Items.Clear ;
   For M := Low(TpcnRegTrib) to High(TpcnRegTrib) do
      cbbRegTributario.Items.Add( GetEnumName(TypeInfo(TpcnRegTrib), integer(M) ) ) ;
+
+  cbSSLLib.Items.Clear ;
+  For e := Low(TSSLLib) to High(TSSLLib) do
+    cbSSLLib.Items.Add( GetEnumName(TypeInfo(TSSLLib), integer(E) ) ) ;
+  cbSSLLib.ItemIndex := 0 ;
+
+  cbCryptLib.Items.Clear ;
+  For U := Low(TSSLCryptLib) to High(TSSLCryptLib) do
+    cbCryptLib.Items.Add( GetEnumName(TypeInfo(TSSLCryptLib), integer(U) ) ) ;
+  cbCryptLib.ItemIndex := 0 ;
+
+  cbHttpLib.Items.Clear ;
+  For V := Low(TSSLHttpLib) to High(TSSLHttpLib) do
+    cbHttpLib.Items.Add( GetEnumName(TypeInfo(TSSLHttpLib), integer(V) ) ) ;
+  cbHttpLib.ItemIndex := 0 ;
+
+  cbXmlSignLib.Items.Clear ;
+  For X := Low(TSSLXmlSignLib) to High(TSSLXmlSignLib) do
+    cbXmlSignLib.Items.Add( GetEnumName(TypeInfo(TSSLXmlSignLib), integer(X) ) ) ;
+  cbXmlSignLib.ItemIndex := 0 ;
+
+  cbSSLType.Items.Clear ;
+  For Y := Low(TSSLType) to High(TSSLType) do
+    cbSSLType.Items.Add( GetEnumName(TypeInfo(TSSLType), integer(Y) ) ) ;
+  cbSSLType.ItemIndex := 0 ;
+
+//  cbFormaEmissao.Items.Clear ;
+//  For q := Low(TpcnTipoEmissao) to High(TpcnTipoEmissao) do
+//     cbFormaEmissao.Items.Add( GetEnumName(TypeInfo(TpcnTipoEmissao), integer(q) ) ) ;
+//  cbFormaEmissao.Items[0] := 'teNormal' ;
+//  cbFormaEmissao.ItemIndex := 0 ;
+
+//  cbModeloDF.Items.Clear ;
+//  For s := Low(TpcnModeloDF) to High(TpcnModeloDF) do
+//     cbModeloDF.Items.Add( GetEnumName(TypeInfo(TpcnModeloDF), integer(s) ) ) ;
+//  cbModeloDF.Items[0] := 'moNFe' ;
+//  cbModeloDF.ItemIndex := 0 ;
+
 
   edtEnderecoBancoAtual.Text :=  frmLogin.pEnderecoServidor;
   edtPortaAtual.Text := frmLogin.pPortaServidor;
@@ -1267,6 +1333,8 @@ begin
   ChArquivos.Checked := frmLogin.sSalvaArq;
   EdtArquivos.Text := frmLogin.sPathArq;
   edtNumeroUltimaNFe.Text := IntToStr(frmLogin.sUltNumNFe);
+  edtNumeroNFe.Text := IntToStr(frmLogin.sNumNFe);
+
   if AnsiUpperCase(frmLogin.sEmissaoNFeServidorOuClient) = 'SERVIDOR' then
     RGLocalEmissaoNFe.ItemIndex := 0
   else

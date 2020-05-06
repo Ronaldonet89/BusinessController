@@ -48,7 +48,7 @@ type
     procedure AtualizarTela;
   public
     { Public declarations }
-    aConfiguracoesClientes : array[1..26] of string;
+    aConfiguracoesClientes : array[1..29] of string;
     pEnderecoServidor,pPortaServidor,pPortaImpressora,
     pModeloImpressora,pNomeUsuario,pNumeroCaixa,pSenhaUsuario,
     pPercentualAvisoCliente,pCaminhoMapeamentoServidor,
@@ -57,7 +57,7 @@ type
     pMovimentaCaixa : boolean;
     pAliqicm,pAliqPis,pAliqCofins : Double;
     // configurações do AcBr
-    sFormas, sAmbiente,sUltNumNFe : Integer;
+    sFormas, sAmbiente,sUltNumNFe,sNumNFe, pClintePadrao : Integer;
     sSalvaArq : Boolean;
     sLogoMarca, sPathArq, sCertificado, sSenha, sSerial,
     sRazao, sFantasia, sCNPJ, sIE, sEndereco, sNum,
@@ -66,7 +66,7 @@ type
     sAliquotaPis, sAliquotaCofins,sEmissaoNFeServidorOuClient,
     sSmtpHost,sSmtpPorta,sSmtpUsuario,sSmtpSenha,sEmailAssunto,
     sEmailSSL,sEmailMensagem,sCopiaControlada,
-    sEmail,sSite : String;
+    sEmail,sSite, pSaldoNegativo : String;
 
     //Configurações sat
     pModeloSat,pTipoAmbienteSat,pRegimeTributario,
@@ -279,6 +279,7 @@ begin
   end;
   }
   //VERIFICA SE EXISTE O ARQUIVO DENTRO DA PASTA
+
   if FileExists(ExtractFilePath(Application.ExeName)+'\dev-ptbr.ini') then
   begin
     cxLocalizer1.LoadFromFile(ExtractFilePath(Application.ExeName)+'\dev-ptbr.ini');
@@ -347,6 +348,7 @@ begin
   pNomeUsuario := cxEdtUsuario.Text;
   pSenhaUsuario := cxEdtSenha.Text;
   AtualizarTela;
+
   Self.Hide;
   if not Assigned(SplitForm) then
     SplitForm := TSplitForm.Create(Self);
@@ -389,6 +391,8 @@ begin
   ArqINI.WriteString('CONFIGURACOES','PASTA_MAPEADA_SERVIDOR',pCaminhoMapeamentoServidor);
   //
   ArqINI.WriteInteger('CONFIGURACOES','SAT_OU_ECF',pSat_ECF);
+  ArqINI.WriteString('CONFIGURACOES','SALDO_NEGATIVO',pSaldoNegativo);
+  ArqINI.WriteInteger('CONFIGURACOES','CLIENTE_PADRAO',pClintePadrao);
   //
   //SAT
   ArqINI.WriteInteger('SAT','MODELO_SAT',pModeloSat);
@@ -415,6 +419,8 @@ begin
   ArqIni.WriteString('SAT','ALIQ_ICMS',FloattoStr(pAliqIcm));
   ArqIni.WriteString('SAT','ALIQ_PIS',FloattoStr(pAliqPis));
   ArqIni.WriteString('SAT','ALIQ_COFINS',FloattoStr(pAliqCofins));
+  ArqINI.WriteString('BANCO','CAMINHO',Pconexao);
+
   ArqINI.Free;
   aConfiguracoesClientes[1] := pEnderecoServidor;
   aConfiguracoesClientes[2] := pPortaServidor;
@@ -426,23 +432,25 @@ begin
   aConfiguracoesClientes[8] := pNomeAlmoxarifadoPadraoBalcao;
   aConfiguracoesClientes[9] := IntToStr(pAlmoxarifadoPadraoBalcao);
   aConfiguracoesClientes[10] := IntToStr(pSat_ECF);
-
-  aConfiguracoesClientes[11] := IntToStr(pModeloSat);
-  aConfiguracoesClientes[12] := pCaminhoDllSat;
-  aConfiguracoesClientes[13] := IntToStr(pTipoAmbienteSat);
-  aConfiguracoesClientes[14] := pCNPJSoftwareHouse;
-  aConfiguracoesClientes[15] := pCNPJEmitente;
-  aConfiguracoesClientes[16] := pInscricaoEstadual;
-  aConfiguracoesClientes[17] := pInscricaoMunicipal;
-  aConfiguracoesClientes[18] := IntToStr(pRegimeTributario);
-  aConfiguracoesClientes[19] := IntToStr(pTributacaoISSQN);
-  aConfiguracoesClientes[20] := IntToStr(pIndRatISSQN);
-  aConfiguracoesClientes[21] := IntToStr(pUtf);
-  aConfiguracoesClientes[22] := pAssinatura;
-  aConfiguracoesClientes[23] := pCodigoAtivacao;
-  aConfiguracoesClientes[24] := FloattoStr(pAliqIcm);
-  aConfiguracoesClientes[25] := FloattoStr(pAliqPis);
-  aConfiguracoesClientes[26] := FloattoStr(pAliqCofins);
+  aConfiguracoesClientes[11] := (pSaldoNegativo);
+  aConfiguracoesClientes[12] := IntToStr(pClintePadrao);
+  aConfiguracoesClientes[13] := IntToStr(pModeloSat);
+  aConfiguracoesClientes[14] := pCaminhoDllSat;
+  aConfiguracoesClientes[15] := IntToStr(pTipoAmbienteSat);
+  aConfiguracoesClientes[16] := pCNPJSoftwareHouse;
+  aConfiguracoesClientes[17] := pCNPJEmitente;
+  aConfiguracoesClientes[18] := pInscricaoEstadual;
+  aConfiguracoesClientes[19] := pInscricaoMunicipal;
+  aConfiguracoesClientes[20] := IntToStr(pRegimeTributario);
+  aConfiguracoesClientes[21] := IntToStr(pTributacaoISSQN);
+  aConfiguracoesClientes[22] := IntToStr(pIndRatISSQN);
+  aConfiguracoesClientes[23] := IntToStr(pUtf);
+  aConfiguracoesClientes[24] := pAssinatura;
+  aConfiguracoesClientes[25] := pCodigoAtivacao;
+  aConfiguracoesClientes[26] := FloattoStr(pAliqIcm);
+  aConfiguracoesClientes[27] := FloattoStr(pAliqPis);
+  aConfiguracoesClientes[28] := FloattoStr(pAliqCofins);
+  aConfiguracoesClientes[29] := Pconexao;
   MessageDlg('Gravação efetuada com êxito',mtConfirmation,[mbOK],0);
 end;
 
@@ -462,6 +470,8 @@ begin
 //  ArqINI.WriteString('CONFIGURACOES','SKIN','');
   pCaminhoMapeamentoServidor := ArqINI.ReadString('CONFIGURACOES','PASTA_MAPEADA_SERVIDOR','');
   pSat_ECF := ArqINI.ReadInteger('CONFIGURACOES','SAT_OU_ECF',0);
+  pSaldoNegativo := ArqINI.ReadString('CONFIGURACOES','SALDO_NEGATIVO','N');
+  pClintePadrao := ArqINI.ReadInteger('CONFIGURACOES','CLIENTE_PADRAO',1);
   //
   //SAT
   pModeloSat := ArqINI.ReadInteger('SAT','MODELO_SAT',0);
@@ -479,6 +489,9 @@ begin
   pUtf := ArqINI.ReadInteger('SAT','UTF',0);
   pAssinatura :=  ArqINI.ReadString('SAT','CHAVE_ASSINATURA','');
   pCodigoAtivacao := ArqINI.ReadString('SAT','CODIGO_ATIVACAO','');
+  pAliqIcm  := StrToFloat(ArqINI.ReadString('SAT','ALIQ_ICMS','0'));
+  pAliqPis  := StrToFloat(ArqINI.ReadString('SAT','ALIQ_ICMS','0'));
+  pAliqCofins := StrToFloat(ArqINI.ReadString('SAT','ALIQ_ICMS','0'));
   Pconexao:= ArqINI.ReadString('BANCO','CAMINHO','');
 
   ArqINI.Free;
@@ -492,23 +505,25 @@ begin
   aConfiguracoesClientes[8] := pNomeAlmoxarifadoPadraoBalcao;
   aConfiguracoesClientes[9] := IntToStr(pAlmoxarifadoPadraoBalcao);
   aConfiguracoesClientes[10] := IntToStr(pSat_ECF);
-
-  aConfiguracoesClientes[11] := IntToStr(pModeloSat);
-  aConfiguracoesClientes[12] := pCaminhoDllSat;
-  aConfiguracoesClientes[13] := IntToStr(pTipoAmbienteSat);
-  aConfiguracoesClientes[14] := pCNPJSoftwareHouse;
-  aConfiguracoesClientes[15] := pCNPJEmitente;
-  aConfiguracoesClientes[16] := pInscricaoEstadual;
-  aConfiguracoesClientes[17] := pInscricaoMunicipal;
-  aConfiguracoesClientes[18] := IntToStr(pRegimeTributario);
-  aConfiguracoesClientes[19] := IntToStr(pTributacaoISSQN);
-  aConfiguracoesClientes[20] := IntToStr(pIndRatISSQN);
-  aConfiguracoesClientes[21] := IntToStr(pUtf);
-  aConfiguracoesClientes[22] := pAssinatura;
-  aConfiguracoesClientes[23] := pCodigoAtivacao;
-  aConfiguracoesClientes[24] := FloattoStr(pAliqIcm);
-  aConfiguracoesClientes[25] := FloattoStr(pAliqPis);
-  aConfiguracoesClientes[26] := FloattoStr(pAliqCofins);
+  aConfiguracoesClientes[11] := (pSaldoNegativo);
+  aConfiguracoesClientes[12] := IntToStr(pClintePadrao);
+  aConfiguracoesClientes[13] := IntToStr(pModeloSat);
+  aConfiguracoesClientes[14] := pCaminhoDllSat;
+  aConfiguracoesClientes[15] := IntToStr(pTipoAmbienteSat);
+  aConfiguracoesClientes[16] := pCNPJSoftwareHouse;
+  aConfiguracoesClientes[17] := pCNPJEmitente;
+  aConfiguracoesClientes[18] := pInscricaoEstadual;
+  aConfiguracoesClientes[19] := pInscricaoMunicipal;
+  aConfiguracoesClientes[20] := IntToStr(pRegimeTributario);
+  aConfiguracoesClientes[21] := IntToStr(pTributacaoISSQN);
+  aConfiguracoesClientes[22] := IntToStr(pIndRatISSQN);
+  aConfiguracoesClientes[23] := IntToStr(pUtf);
+  aConfiguracoesClientes[24] := pAssinatura;
+  aConfiguracoesClientes[25] := pCodigoAtivacao;
+  aConfiguracoesClientes[26] := FloattoStr(pAliqIcm);
+  aConfiguracoesClientes[27] := FloattoStr(pAliqPis);
+  aConfiguracoesClientes[28] := FloattoStr(pAliqCofins);
+  aConfiguracoesClientes[29] := Pconexao;
 end;
 
 end.

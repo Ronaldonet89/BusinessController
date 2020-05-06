@@ -336,6 +336,7 @@ begin
   DM.cdsPedidos.CommandText := 'SELECT * FROM PEDIDOS WHERE ID_PEDIDO = -1';
   DM.cdsPedidos.Open;
   DM.cdsPedidos_Itens.Close;
+  DM.cdsPedidos_Itens.CommandText := 'SELECT * FROM PEDIDOS_ITENS WHERE ID_PEDIDO = :ID_PEDIDO';
   DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := DM.cdsPedidosID_PEDIDO.AsInteger;
   dm.cdsPedidos_Itens.Open;
   DM.cdsComandas.Active := True;
@@ -356,6 +357,7 @@ var
   vQualCodigo,vString : string;
   vQuantidade,vSubTotal : real;
 begin
+  vQuantidade:= 0;
   if vStatusVenda = False then
   begin
     MessageDlg('No momento, não está sendo feita nenhuma venda',mtError,[mbOk],0);
@@ -556,7 +558,7 @@ begin
   end;
   vStatusVenda := True;
   if vLinhaInicialMemo = '' then
-    vLinhaInicialMemo := '   Bem vindo(a) a BijouxNet. '+'Data : '+DateToStr(Date)+'  Hora : '+
+    vLinhaInicialMemo := '   Bem vindo(a) a '+frmLogin.sFantasia +'. Data : '+DateToStr(Date)+'  Hora : '+
                FormatDateTime('hh:mm:ss',Time);
   vString := '';
   cxMemo1.Lines.Clear;
@@ -642,8 +644,8 @@ begin
       goto vProximoPasso;
     end;
   end;
-  DM.cdsPedidos_ItensID_PEDIDO.Value := DM.cdsPedidosID_PEDIDO.AsInteger;
-  DM.cdsPedidos_ItensDESCRICAO_PRODUTO.Value := edtDescricao.Text;
+  DM.cdsPedidos_ItensID_PEDIDO.AsInteger := DM.cdsPedidosID_PEDIDO.AsInteger;
+  DM.cdsPedidos_ItensDESCRICAO_PRODUTO.AsString := edtDescricao.Text;
   DM.cdsPedidos_ItensID_PRODUTO.Value := cdsProdutos.FieldByName('PRO_ID').AsInteger;
   DM.cdsPedidos_ItensVALOR_UNITARIO.Value := StrToFloat(edtPreco.Text);
   DM.cdsPedidos_ItensALIQUOTA_ICMS.value := cdsProdutos.FieldByName('ALIQUOTA_ICMS').AsInteger;
@@ -736,7 +738,7 @@ begin
   if DM.cdsGenerico.FieldByName('NUMERO_COMANDA').AsString = '' then
   begin
     vStatusVenda := True;
-    vString := '   Bem vindo(a) a BijouxNet. '+'Data : '+DateToStr(Date)+'  Hora : '+
+    vString := '   Bem vindo(a) a '+frmLogin.sFantasia+'. Data : '+DateToStr(Date)+'  Hora : '+
                    FormatDateTime('hh:mm:ss',Time);
     vLinhaInicialMemo := vString;
     cxMemo1.Lines.Add(vString);
@@ -744,12 +746,12 @@ begin
     vTipoVenda := 'VENDA INICIADA';
     Conexao := TDSModuleDbClient.Create(DM.SQLConexao.DBXConnection);
     DM.cdsPedidos.Insert;
-    DM.cdsPedidosTIPO_OPERACAO.Value := 'VD';
+    DM.cdsPedidosTIPO_OPERACAO.AsString := 'VD';
 //    DM.cdsPedidosDATA_PEDIDO.Value := Date;
 //    DM.cdsPedidosHORA_PEDIDO.Value := Time;
     DM.cdsPedidosSTATUS.Value := 'P';
-    DM.cdsPedidosPEDIDO_EM_VENDA.Value := 'S';
-    DM.cdsPedidosNUMERO_COMANDA.Value := vComanda;
+    DM.cdsPedidosPEDIDO_EM_VENDA.AsString := 'S';
+    DM.cdsPedidosNUMERO_COMANDA.AsString := vComanda;
     DM.cdsPedidosID_CLIENTE.AsInteger := 0;
 //    DM.cdsPedidosID_USUARIO.AsInteger := Conexao.RetornaIdentificadorUsuario(frmLogin.pNomeUsuario);
     vPedido := DM.cdsPedidosID_PEDIDO.AsInteger;
@@ -772,9 +774,9 @@ end;
 
 procedure TfrmPdv.spbConfirmarVendaClick(Sender: TObject);
 var
-  vContador:integer;
+  //vContador:integer;
   vSomaValorTotal : Real;
-  vConectaServidor : TDSModuleDbClient;
+  //vConectaServidor : TDSModuleDbClient;
 begin
   if vStatusVenda then
   begin
@@ -785,7 +787,7 @@ begin
 //      abort;
 //    end;
 
-    vContador := 0;
+    //vContador := 0;
     vSomaValorTotal := 0;
     DM.cdsPedidos_Itens.Close;
     DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := DM.cdsPedidosID_PEDIDO.AsInteger;
@@ -794,7 +796,7 @@ begin
     DM.cdsPedidos_Itens.First;
     while not dm.cdsPedidos_Itens.Eof do
     begin
-      Inc(vContador);
+      //Inc(vContador);
       vSomaValorTotal := vSomaValorTotal + dm.cdsPedidos_ItensVALOR_TOTAL.AsFloat;
       dm.cdsPedidos_Itens.Next;
     end;

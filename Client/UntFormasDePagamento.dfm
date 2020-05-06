@@ -73,7 +73,7 @@ object frmLookUpFormaDePagamento: TfrmLookUpFormaDePagamento
       DataController.Summary.SummaryGroups = <>
       object cxGrid1DBTableView1FORMA_DE_PAGAMENTO: TcxGridDBColumn
         Caption = 'Forma de pagamento'
-        DataBinding.FieldName = 'FORMA_DE_PAGAMENTO'
+        DataBinding.FieldName = 'DESCRICAO_FORMA_DE_PAGAMENTO'
         Width = 645
       end
     end

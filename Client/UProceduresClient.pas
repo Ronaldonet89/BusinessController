@@ -10,7 +10,7 @@ interface
   cxGrid, Vcl.ExtCtrls, cxCustomPivotGrid, cxDBPivotGrid,
   cxPivotGridChartConnection, cxGridChartView, cxGridDBChartView, Vcl.StdCtrls,
   cxExportPivotGridLink,cxGridExportLink, Vcl.Buttons,Data.FMTBcd, Data.SqlExpr,IniFiles,
-  ACBrECF;
+  ACBrECF, System.UITypes;
 
   procedure ExportaPivotGrid(qGrid:TcxDBPivotGrid;Expande,UsaFormatoNativo : boolean;ExtensaoArquivo:string);
   procedure ExportaGrid(qGrid:TcxGrid;Expande,IraSalvar,UsaFormatoNativo : boolean;ExtensaoArquivo:string);
@@ -268,7 +268,8 @@ begin
   frmLogin.sLogoMarca   := ArqINI.ReadString('GERAL','LOGOMARCA','C:\logo.jpg');
   frmLogin.sSalvaArq    := ArqINI.ReadBool('GERAL','SALVA_ARQUIVO',true);
   frmLogin.sPathArq     := ArqINI.ReadString('GERAL','PATH_ARQUIVO','C:\');
-  frmLogin.sUltNumNFe   := ArqINI.ReadInteger('GERAL','ULTIMO_NUMERO_NFE',0);
+  frmLogin.sUltNumNFe   := ArqINI.ReadInteger('GERAL','ULTIMO_NUMERO_NFE',1);
+  frmLogin.sNumNFe   := ArqINI.ReadInteger('GERAL','NUMERO_NFE',1);
 //  frmLogin.sEmissaoNFeServidorOuClient := ArqINI.ReadString('GERAL','LOCAL_EMISSAO_NFE','SERVIDOR');
   // CERTIFICADO
   frmLogin.sCertificado := ArqINI.ReadString('CERTIFICADO','PATH_CERTIFICADO','');
@@ -312,6 +313,7 @@ begin
   ArqINI.WriteBool('GERAL','SALVA_ARQUIVO',frmLogin.sSalvaArq);
   ArqINI.WriteString('GERAL','PATH_ARQUIVO',frmLogin.sPathArq);
   ArqINI.WriteInteger('GERAL','ULTIMO_NUMERO_NFE',frmLogin.sUltNumNFe);
+  ArqINI.WriteInteger('GERAL','NUMERO_NFE',frmLogin.sNumNFe);
 //  ArqINI.WriteString('GERAL','LOCAL_EMISSAO_NFE',frmLogin.sEmissaoNFeServidorOuClient);
   // CERTIFICADO
   ArqINI.WriteString('CERTIFICADO','PATH_CERTIFICADO',frmLogin.sCertificado);

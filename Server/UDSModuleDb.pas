@@ -606,8 +606,27 @@ type
     SQLDSProdutosCUSTO: TFMTBCDField;
     SQLDSPedidosItensCODIGO: TStringField;
     SQLDSProdutosCOD_PROD: TIntegerField;
+    //ACBrNFeDANFEFR1: TACBrNFeDANFEFR;
+    //ACBrIBGE1: TACBrIBGE;
+    SQLDSTipoOperacaoALIQUOTA_IPI: TFMTBCDField;
+    SQLDSTipoOperacaoALIQUOTA_PIS: TFMTBCDField;
+    SQLDSTipoOperacaoALIQUOTA_COFINS: TFMTBCDField;
+    SQLDCFOP: TSQLDataSet;
+    DSPCFOP: TDataSetProvider;
+    SQLDCFOPID: TIntegerField;
+    SQLDCFOPCODIGO: TIntegerField;
+    SQLDCFOPDESCRICAO: TStringField;
+    SQLDCFOPCFOPENTRADA: TIntegerField;
+    SQLDCFOPTIPO: TSmallintField;
+    SQLDCFOPAPLICACAO: TStringField;
+    SQLDSNotasFiscaisCFOP: TIntegerField;
+    SQLDSNotasFiscaisCFOPDESCRICAO: TStringField;
     ACBrNFeDANFEFR1: TACBrNFeDANFEFR;
-    ACBrIBGE1: TACBrIBGE;
+    SQLDSClientesCODMUNICIPIO: TIntegerField;
+    SQLDSNotasFiscaisItensCOR: TStringField;
+    SQLDSNotasFiscaisItensTAMANHO: TStringField;
+    SQLDSPedidosItensCOR: TStringField;
+    SQLDSPedidosItensTAMANHO: TStringField;
     procedure DSServerModuleCreate(Sender: TObject);
     procedure CDSFormasPagamentosAfterPost(DataSet: TDataSet);
     procedure CDSFormasPagamentosAfterDelete(DataSet: TDataSet);
@@ -929,7 +948,7 @@ end;
 
 procedure TDSModuleDb.cdsUsuariosAfterInsert(DataSet: TDataSet);
 begin
-  cdsUsuariosID_USUARIO.Value := GeneratorIncrementado('NOVO_USUARIO');
+  cdsUsuariosID_USUARIO.Value := GeneratorIncrementado('NOVA_USUARIO');
 end;
 
 procedure TDSModuleDb.cdsUsuariosAfterPost(DataSet: TDataSet);
@@ -1294,7 +1313,6 @@ var
   vRetornoFuncao : string;
   vIdCliente,vContadorItem,vIdTransportador : integer;
 begin
-
   LeArqIni;
   AtualizaConfigAcBr;
   //  ACBrNFe1.Configuracoes.Certificados.NumeroSerie := '55724df82f3454bf';
@@ -1449,7 +1467,11 @@ begin
     Dest.EnderDest.nro     := SQLDSGenerica.FieldByName('NUMERO').AsString;//'973';
     Dest.EnderDest.xCpl    := '';
     Dest.EnderDest.xBairro := SQLDSGenerica.FieldByName('BAIRRO').AsString;//'Centro';
-    Dest.EnderDest.cMun    := AcbrIbge1.BuscarPorNome(SQLDSGenerica.FieldByName('CIDADE').AsString,SQLDSGenerica.FieldByName('UF').AsString);
+
+    //if AcbrIbge1.BuscarPorNome(SQLDSGenerica.FieldByName('CIDADE').AsString,SQLDSGenerica.FieldByName('UF').AsString) > 0 then
+    //  Dest.EnderDest.cMun    := AcbrIbge1.BuscarPorNome(SQLDSGenerica.FieldByName('CIDADE').AsString,SQLDSGenerica.FieldByName('UF').AsString)
+    //else
+      Dest.EnderDest.cMun    := StrToInt('3500709');
     Dest.EnderDest.xMun    := SQLDSGenerica.FieldByName('CIDADE').AsString;//'Centro';
     Dest.EnderDest.UF      := SQLDSGenerica.FieldByName('UF').AsString;//'Centro';
     Dest.EnderDest.cPais   := 1058;
@@ -1492,8 +1514,6 @@ begin
       SQLDSGenerica.Next;
     end;
 
-
-
     Cobr.Fat.nFat  := 'Numero da Fatura';
     Cobr.Fat.vOrig := 100 ;
     Cobr.Fat.vDesc := 0 ;
@@ -1522,14 +1542,14 @@ begin
 
     with InfAdic.obsCont.Add do
     begin
-      xCampo := 'ObsCont';
-      xTexto := 'Texto';
+      xCampo := '';
+      xTexto := '';
     end;
 
     with InfAdic.obsFisco.Add do
     begin
-      xCampo := 'ObsFisco';
-      xTexto := 'Texto';
+      xCampo := '';
+      xTexto := '';
     end;
 
     exporta.UFembarq   := '';;

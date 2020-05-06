@@ -24217,7 +24217,6 @@ object frmCadastros: TfrmCadastros
         Font.Name = 'Segoe UI'
         Font.Style = [fsBold]
         ParentFont = False
-        ExplicitTop = 556
         ExplicitHeight = 20
       end
     end

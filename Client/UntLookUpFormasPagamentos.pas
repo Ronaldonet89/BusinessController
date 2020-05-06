@@ -70,10 +70,11 @@ type
     procedure cxGrid3Exit(Sender: TObject);
   private
     { Private declarations }
-    vValorParcelado : Real;
+    vValorParcelado, vlPedido : Real;
   public
     { Public declarations }
     vContinua : Boolean;
+    vtroco: real;
   end;
 
 var
@@ -122,17 +123,18 @@ end;
 procedure TfrmlookUpFormaPagamento.cxButton1Click(Sender: TObject);
 begin
   vContinua := False;
+  Self.Close;
 end;
 
 procedure TfrmlookUpFormaPagamento.cxButton2Click(Sender: TObject);
 begin
-  if MessageDlg('Deseja Excluir a condições deste Pedido?',mtWarning,[mbok,mbYes],0)= mrYes then
-    dm.cdsPedidos_Formas_Condicoes.Delete;
+  if dm.cdsPedidos_Formas_Condicoes.RecordCount > 0 then
+    if MessageDlg('Deseja Excluir as condições deste Pedido?',mtWarning,[mbno,mbYes],0)= mrYes then
+      dm.cdsPedidos_Formas_Condicoes.Delete;
 end;
 
 procedure TfrmlookUpFormaPagamento.cxGrid3Enter(Sender: TObject);
 begin
-
   cxButton2.Enabled:= true;
 end;
 
@@ -144,12 +146,13 @@ end;
 procedure TfrmlookUpFormaPagamento.cxGridCondicaoDBTableView1KeyDown(
   Sender: TObject; var Key: Word; Shift: TShiftState);
 var
-  vValor, vDesconto, vValorTotalParcelado : Real;
+  vValor,vValorTotalParcelado, vDesconto : Real;
+
 begin
   if Key = VK_RETURN then
   begin
-    vValor := 0;
-    vValorTotalParcelado := 0;
+    //vValor := 0;
+    //vValorTotalParcelado := 0;
     if not dm.cdsPedidos_Formas_Condicoes.Active then
       dm.cdsPedidos_Formas_Condicoes.Active := true;
 
@@ -165,10 +168,12 @@ begin
         FrmComposicaoVenda.Label2.visible:= false;
         FrmComposicaoVenda.edtDesconto.visible:= false;
       end;
-      
+
+      FrmComposicaoVenda.vlPagar:= vlPedido;
       FrmComposicaoVenda.ShowModal;
-      vValor := FrmComposicaoVenda.EdtValor.Value;
+      vValor := (FrmComposicaoVenda.EdtValor.Value - FrmComposicaoVenda.cxTroco.Value);
       vDesconto := FrmComposicaoVenda.EdtDesconto.Value;
+      vtroco   := FrmComposicaoVenda.vlTroco;
       FreeAndNil(FrmComposicaoVenda);
 
       if vDesconto > 0 then
@@ -253,6 +258,7 @@ begin
   cxlblValorParcelado.Caption := 'Valor parcelado R$ '+FormatFloat('###,###,##0.00',vValorParcelado);
   cxLblSaldo.Caption := 'Saldo R$ '+FormatFloat('###,###,##0.00',vValorParcelado);
   vContinua := False;
+  vlPedido:= dm.cdsPedidosVALOR_TOTAL.AsFloat;
 end;
 
 end.

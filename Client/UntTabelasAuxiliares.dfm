@@ -621,6 +621,34 @@ object frmTabelasAuxiliares: TfrmTabelasAuxiliares
           DataSource = DM.dsTiposDeOperacao
           TabOrder = 12
         end
+        object cxLabel24: TcxLabel
+          Left = 300
+          Top = 476
+          Caption = 'Aliquota PIS'
+        end
+        object cxLabel25: TcxLabel
+          Left = 379
+          Top = 476
+          Caption = 'Aliquota Cofins'
+        end
+        object DBEdit24: TDBEdit
+          Left = 300
+          Top = 499
+          Width = 73
+          Height = 21
+          DataField = 'ALIQUOTA_PIS'
+          DataSource = DM.dsTiposDeOperacao
+          TabOrder = 15
+        end
+        object DBEdit25: TDBEdit
+          Left = 379
+          Top = 499
+          Width = 73
+          Height = 21
+          DataField = 'ALIQUOTA_COFINS'
+          DataSource = DM.dsTiposDeOperacao
+          TabOrder = 16
+        end
       end
     end
     object cxTSFormas_Condicoes: TcxTabSheet

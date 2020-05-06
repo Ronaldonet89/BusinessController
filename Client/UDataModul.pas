@@ -11,7 +11,7 @@ uses
   FireDAC.Phys, FireDAC.Phys.ODBCBase, FireDAC.Phys.MSSQL, FireDAC.Comp.Client,
   FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt,
   FireDAC.Comp.DataSet, FireDAC.VCLUI.Wait, FireDAC.Comp.UI,
-  FireDAC.Phys.IBBase, FireDAC.Phys.FB;
+  FireDAC.Phys.IBBase, FireDAC.Phys.FB, ACBrBase, ACBrSocket, frxClass; //ACBrIBGE
 
 type
   TDM = class(TDataModule)
@@ -463,6 +463,29 @@ type
     FDPhysFBDriverLink1: TFDPhysFBDriverLink;
     FDQNFE: TFDQuery;
     FDQCliente: TFDQuery;
+    //ACBrIBGE1: TACBrIBGE;
+    cdsTiposDeOperacaoALIQUOTA_PIS: TFMTBCDField;
+    cdsTiposDeOperacaoALIQUOTA_COFINS: TFMTBCDField;
+    cdsTiposDeOperacaoALIQUOTA_IPI: TFMTBCDField;
+    cdsCFOP: TClientDataSet;
+    dsCFOP: TDataSource;
+    cdsCFOPID: TIntegerField;
+    cdsCFOPCODIGO: TIntegerField;
+    cdsCFOPDESCRICAO: TStringField;
+    cdsCFOPCFOPENTRADA: TIntegerField;
+    cdsCFOPTIPO: TSmallintField;
+    cdsCFOPAPLICACAO: TStringField;
+    cdsNotasFiscaisCFOP: TIntegerField;
+    cdsNotasFiscaisCFOPDESCRICAO: TStringField;
+    frxReport1: TfrxReport;
+    cdsClientesCODMUNICIPIO: TIntegerField;
+    cdsNotasFiscaisDATA_HORA_CANCELAMENTO: TStringField;
+    cdsNotasFiscaisMOTIVO_CANCELAMENTO: TStringField;
+    cdsNotasFiscaisItensCOR: TStringField;
+    cdsNotasFiscaisItensTAMANHO: TStringField;
+    FDBusca2: TFDQuery;
+    cdsPedidos_ItensCOR: TStringField;
+    cdsPedidos_ItensTAMANHO: TStringField;
     procedure DataModuleCreate(Sender: TObject);
     procedure cdsProdutosAfterPost(DataSet: TDataSet);
     procedure cdsProdutosAfterInsert(DataSet: TDataSet);
@@ -503,7 +526,6 @@ type
     procedure cdsDuplicatasNotasFiscaisAfterInsert(DataSet: TDataSet);
     procedure DataModuleDestroy(Sender: TObject);
     procedure cdsTiposDeOperacaoAfterDelete(DataSet: TDataSet);
-    procedure cdsTiposDeOperacaoAfterPost(DataSet: TDataSet);
     procedure cdsConveniosNCMAfterDelete(DataSet: TDataSet);
     procedure cdsConveniosNCMAfterPost(DataSet: TDataSet);
     procedure cdsTiposDeOperacaoAfterInsert(DataSet: TDataSet);
@@ -535,9 +557,12 @@ type
     procedure cdsFormasVSCondicoesAfterDelete(DataSet: TDataSet);
     procedure cdsFormasVSCondicoesAfterPost(DataSet: TDataSet);
     procedure cdsFormasVSCondicoesAfterInsert(DataSet: TDataSet);
+    procedure cdsCFOPAfterDelete(DataSet: TDataSet);
+    procedure cdsCFOPAfterInsert(DataSet: TDataSet);
+    procedure cdsCFOPAfterPost(DataSet: TDataSet);
   private
     { Private declarations }
-    stg: TStringGrid;
+    //stg: TStringGrid;
 
   public
     { Public declarations }
@@ -552,7 +577,7 @@ implementation
 
 {%CLASSGROUP 'Vcl.Controls.TControl'}
 
-uses ULogin, UntConectaServidor, GroupedItems1, UntLookUpProdutos;
+uses ULogin, UntConectaServidor, GroupedItems1, UntLookUpProdutos,UProceduresClient;
 
 {$R *.dfm}
 
@@ -648,11 +673,14 @@ end;
 
 procedure TDM.cdsPedidosDeCompraItensAfterPost(DataSet: TDataSet);
 var
-   vTotal,vIpi,vICMS : Real;
+   vTotal, vIpi, vICMS : Real;
 begin
+  vICMS := 0;
+  vIpi := 0;
+  vTotal := 0;
   (DataSet as TClientDataSet).ApplyUpdates(0);
   (Dataset as TClientDataSet).Refresh;
-  vTotal := 0;
+
   dm.cdsPedidosDeCompraItens.DisableControls;
   dm.cdsPedidosDeCompraItens.First;
   while not dm.cdsPedidosDeCompraItens.Eof do
@@ -663,9 +691,7 @@ begin
   end;
   dm.cdsPedidosDeCompraItens.First;
   dm.cdsPedidosDeCompraItens.EnableControls;
-  vIpi := 0;
   vIpi := (vTotal * dm.cdsPedidosDeCompraPERCENTUAL_IPI.AsFloat)/100;
-  vICMS := 0;
   vICMS := (vTotal * dm.cdsPedidosDeCompraPERCENTUAL_ICMS.AsFloat)/100;
   dm.cdsPedidosDeCompra.Edit;
   dm.cdsPedidosDeCompraVALOR_TOTAL.AsFloat := vTotal + vIpi + vICMS;
@@ -712,8 +738,8 @@ begin
 end;
 
 procedure TDM.cdsPedidos_ItensAfterPost(DataSet: TDataSet);
-var
-  vTotal,vIpi,vICMS : Real;
+//var
+//  vTotal,vIpi,vICMS : Real;
 begin
   (DataSet as TClientDataSet).ApplyUpdates(0);
   (DataSet as TClientDataSet).Refresh;
@@ -721,6 +747,27 @@ begin
 end;
 
 procedure TDM.cdsProdutosAfterDelete(DataSet: TDataSet);
+begin
+  (DataSet as TClientDataSet).ApplyUpdates(0);
+  (Dataset as TClientDataSet).Refresh;
+end;
+
+procedure TDM.cdsCFOPAfterDelete(DataSet: TDataSet);
+begin
+  (DataSet as TClientDataSet).ApplyUpdates(0);
+  (Dataset as TClientDataSet).Refresh;
+end;
+
+procedure TDM.cdsCFOPAfterInsert(DataSet: TDataSet);
+var
+  vConectaServidor : TDSModuleDbClient;
+begin
+  vConectaServidor := TDSModuleDbClient.Create(DM.SQLConexao.DBXConnection);
+  dm.cdsCFOPCODIGO.AsInteger := vConectaServidor.GeneratorIncrementado('NOVO_CFOP');
+  FreeAndNil(vConectaServidor);
+end;
+
+procedure TDM.cdsCFOPAfterPost(DataSet: TDataSet);
 begin
   (DataSet as TClientDataSet).ApplyUpdates(0);
   (Dataset as TClientDataSet).Refresh;
@@ -922,19 +969,135 @@ begin
   cdsNotasFiscaisDATA_EMISSAO.Value := Date;
   cdsNotasFiscaisHORA_SAIDA_ENTRADA.Value := Now;
   cdsNotasFiscaisNFE_CALCULADA.AsString := 'N';
+  cdsNotasFiscaisNUMERO_PARCELAS.AsInteger := 1;
+  cdsNotasFiscaisENTRADA_SAIDA.AsString:= 'S';
+  cdsNotasFiscaisINFORMACAO_NFE.AsString:= 'fnnormal';
+  cdsNotasFiscaisRESPONSAVEL_FRETE.AsString := 'S';
+  dm.cdsNotasFiscaisFORMA_PAGAMENTO.AsString := 'Dinheiro';
+  dm.cdsNotasFiscaisCONDICAO_PAGAMENTO.AsString := 'A vista';
+  dm.cdsNotasFiscaisID_NATUREZA_OPERACAO.AsInteger := dm.cdsTiposDeOperacaoID_TIPO_OPERACAO.AsInteger;
+  dm.cdsNotasFiscaisNATUREZA_DE_OPERACAO.AsString := DM.cdsTiposDeOperacaoDESCRICAO_TIPO_OPERACAO.AsString;
+
+  cdsNotasFiscaisItens.close;
+  cdsNotasFiscaisItens.CommandText:= 'SELECT * FROM NOTAS_FISCAIS_ITENS where ID_NOTA_FISCAL = 0';
+  cdsNotasFiscaisItens.Open;
+
   FreeAndNil(vConectaServidor);
-  cdsNotasFiscaisItens.Close;
 end;
 
 procedure TDM.cdsNotasFiscaisAfterPost(DataSet: TDataSet);
+var
+  frete, resto, valor , desc, rest, vlr : double;
+  i: integer;
 begin
+  Resto:= 0;
+  resto:= 0;
+  rest:= 0;
+  vlr:= 0;
+  if (cdsNotasFiscaisID_CLIENTE.AsInteger = 0) or (cdsNotasFiscaisID_CLIENTE.IsNull) then
+  begin
+    Showmessage('Cliente não foi informado');
+    exit;
+  end;
+
+  if (cdsNotasFiscaisID_NATUREZA_OPERACAO.AsInteger = 0) or (cdsNotasFiscaisID_CLIENTE.IsNull) then
+  begin
+    Showmessage('Cliente não foi informado');
+    exit;
+  end;
   (DataSet as TClientDataSet).ApplyUpdates(0);
   (Dataset as TClientDataSet).Refresh;
-  cdsNotasFiscaisItens.Filtered := false;
-  cdsNotasFiscaisItens.Filter := '';
-  cdsNotasFiscaisItens.Filter := ' ID_NOTA_FISCAL = '+IntToStr(cdsNotasFiscaisID_NOTA_FISCAL.AsInteger);
-  cdsNotasFiscaisItens.Filtered := true;
-  cdsNotasFiscaisItens.Active := true;
+
+  if cdsNotasFiscaisItens.active then
+  begin
+    if (cdsNotasFiscaisItens.RecordCount > 0) then
+    begin
+      cdsNotasFiscaisItens.First;
+      for I := 0 to cdsNotasFiscaisItens.recordCount - 1 do
+      begin
+
+        cdsGenerico.Close;
+        cdsGenerico.CommandText := 'UPDATE NOTAS_FISCAIS_ITENS '+
+        ' SET CFOP =:CFOP '+
+        ' WHERE ID_NOTA_FISCAL_ITEM = ' + cdsNotasFiscaisItensID_NOTA_FISCAL_ITEM.AsString;
+        cdsGenerico.Params.ParamByName('CFOP').AsString := cdsNotasFiscaisCFOP.AsString;
+
+        cdsGenerico.Execute;
+        cdsNotasFiscaisItens.next;
+      end;
+      cdsNotasFiscaisItens.refresh;
+    end;
+
+    if (cdsNotasFiscaisItens.RecordCount > 0) and (cdsNotasFiscaisVALOR_FRETE.AsFloat > 0) then
+    begin
+      frete:= cdsNotasFiscaisVALOR_FRETE.AsFloat;
+
+      if frete > 0 then
+      begin
+        valor := frete / cdsNotasFiscaisItens.RecordCount;
+        Resto := frete - (valor * cdsNotasFiscaisItens.RecordCount)
+      end;
+
+  //    cdsNotasFiscaisItens.First;
+  //    while not dm.cdsPedidos_Itens.Eof do
+  //    begin
+  //      cdsNotasFiscaisItens.Edit;
+  //      cdsNotasFiscaisItensVALOR_FRETE.AsFloat := valor+Resto;
+  //      Resto:= 0;
+  //      cdsNotasFiscaisItens.post;
+  //    end;
+
+      cdsNotasFiscaisItens.First;
+      for I := 0 to cdsNotasFiscaisItens.recordCount - 1 do
+      begin
+
+        cdsGenerico.Close;
+        cdsGenerico.CommandText := 'UPDATE NOTAS_FISCAIS_ITENS '+
+        ' SET VALOR_FRETE =:VALOR '+
+        ' WHERE ID_NOTA_FISCAL_ITEM = ' + cdsNotasFiscaisItensID_NOTA_FISCAL_ITEM.AsString;
+        cdsGenerico.Params.ParamByName('VALOR').AsFloat := valor+Resto;
+
+        cdsGenerico.Execute;
+        Resto:= 0;
+        cdsNotasFiscaisItens.next;
+
+      end;
+      cdsNotasFiscaisItens.refresh;
+    end;
+
+    if (cdsNotasFiscaisItens.RecordCount > 0) and (cdsNotasFiscaisVALOR_DESCONTO.AsFloat > 0) then
+    begin
+      desc:= cdsNotasFiscaisVALOR_DESCONTO.AsFloat;
+
+      if desc > 0 then
+      begin
+        vlr := desc / cdsNotasFiscaisItens.RecordCount;
+        Rest := desc - (vlr * cdsNotasFiscaisItens.RecordCount)
+      end;
+      cdsNotasFiscaisItens.First;
+      for I := 0 to cdsNotasFiscaisItens.recordCount - 1 do
+      begin
+
+        cdsGenerico.Close;
+        cdsGenerico.CommandText := 'UPDATE NOTAS_FISCAIS_ITENS '+
+        ' SET VALOR_DESCONTO =:VALOR '+
+        ' WHERE ID_NOTA_FISCAL_ITEM = ' + cdsNotasFiscaisItensID_NOTA_FISCAL_ITEM.AsString;
+        cdsGenerico.Params.ParamByName('VALOR').AsFloat := vlr+Rest;
+
+        cdsGenerico.Execute;
+        Rest:= 0;
+        cdsNotasFiscaisItens.next;
+
+      end;
+      cdsNotasFiscaisItens.refresh;
+    end;
+    cdsNotasFiscaisItens.close;
+    cdsNotasFiscaisItens.CommandText:= 'SELECT * FROM NOTAS_FISCAIS_ITENS where ID_NOTA_FISCAL = ' +IntToStr(cdsNotasFiscaisID_NOTA_FISCAL.AsInteger);
+    cdsNotasFiscaisItens.Open;
+  end
+  else
+    cdsNotasFiscaisItens.active := true;
+
 end;
 
 procedure TDM.cdsNotasFiscaisItensAfterDelete(DataSet: TDataSet);
@@ -954,31 +1117,51 @@ begin
   cdsNotasFiscaisItensDESCRICAO_PRODUTO.AsString := cdsProdutosPRO_DESCRICAO.AsString;
   cdsNotasFiscaisItensCODIGO_PRODUTO.AsString := cdsProdutosPRO_CODIGO.AsString;
   cdsNotasFiscaisItensVALOR_UNITARIO.AsFloat := cdsProdutosPRECO_VENDA.AsFloat;
-  cdsNotasFiscaisItensNCM_PRODUTO.AsString := cdsProdutosCODIGO_NCM.AsString;
+  cdsNotasFiscaisItensNCM_PRODUTO.AsString := RetirarPontosETracos(cdsProdutosCODIGO_NCM.AsString);
   cdsNotasFiscaisItensEAN13.AsString := cdsProdutosPRO_EAN13.AsString;
+  cdsNotasFiscaisItensUNIDADE.AsString:=   cdsProdutosUNIDADE.AsString;
+  cdsNotasFiscaisItensQUANTIDADE.AsString:= '1';
+  cdsNotasFiscaisItensCFOP.AsString:= cdsNotasFiscaisCFOP.AsString;
   FreeAndNil(vConectaServidor);
 end;
 
 procedure TDM.cdsNotasFiscaisItensAfterPost(DataSet: TDataSet);
 var
-  vTotalProdutos : Real;
+  vTotalProdutos, vICMs, vPis,vCofins, vIpi, vFrete : Real;
 begin
   (DataSet as TClientDataSet).ApplyUpdates(0);
   (Dataset as TClientDataSet).Refresh;
   cdsNotasFiscaisItens.DisableControls;
   cdsNotasFiscaisItens.First;
+
   vTotalProdutos := 0;
+  vICMs:= 0;
+  vIpi:= 0;
+  vPis:= 0;
+  vCofins:= 0;
+  vFrete:= 0;
+
+  vFrete := cdsNotasFiscaisVALOR_FRETE.AsFloat;
+  cdsNotasFiscaisItens.first;
   while not cdsNotasFiscaisItens.Eof do
   begin
     vTotalProdutos := vTotalProdutos + cdsNotasFiscaisItensVALOR_TOTAL.AsFloat;
+    vICMs := vICMs + cdsNotasFiscaisItensVALOR_ICMS.AsFloat;
+    vIpi:= vIpi + cdsNotasFiscaisItensVALOR_IPI.AsFloat;
+    vPis:= vPis + cdsNotasFiscaisItensVALOR_PIS.AsFloat;
+    vCofins := vCofins + cdsNotasFiscaisItensVALOR_COFINS.AsFloat;
     cdsNotasFiscaisItens.Next;
   end;
   cdsNotasFiscais.DisableControls;
   cdsNotasFiscais.Edit;
   cdsNotasFiscaisVALOR_PRODUTOS.AsFloat := vTotalProdutos;
-  cdsNotasFiscaisVALOR_TOTAL_NOTA.AsFloat := vTotalProdutos + cdsNotasFiscaisVALOR_ICMS.AsFloat + cdsNotasFiscaisVALOR_ST.AsFloat +
-                                             cdsNotasFiscaisVALOR_FRETE.AsFloat + cdsNotasFiscaisVALOR_SEGURO.AsFloat +
-                                             cdsNotasFiscaisVALOR_DESCONTO.AsFloat + cdsNotasFiscaisVALOR_IMPOSTO_IMPORTACAO.AsFloat +
+  cdsNotasFiscaisVALOR_ICMS.AsFloat := vICMs;
+  cdsNotasFiscaisVALOR_IPI.AsFloat := vIpi;
+  cdsNotasFiscaisVALOR_PIS.AsFloat := vPis;
+  cdsNotasFiscaisVALOR_COFINS.AsFloat := vCofins;
+  cdsNotasFiscaisVALOR_TOTAL_NOTA.AsFloat := vTotalProdutos + cdsNotasFiscaisVALOR_ST.AsFloat +
+                                             vFrete + cdsNotasFiscaisVALOR_SEGURO.AsFloat +
+                                             + cdsNotasFiscaisVALOR_IMPOSTO_IMPORTACAO.AsFloat +
                                              cdsNotasFiscaisVALOR_IPI.AsFloat + cdsNotasFiscaisVALOR_PIS.AsFloat +
                                              cdsNotasFiscaisVALOR_COFINS.AsFloat + cdsNotasFiscaisVALOR_OUTROS.AsFloat;
   cdsNotasFiscais.Post;
@@ -1067,12 +1250,6 @@ begin
   FreeAndNil(vConectaServidor);
 end;
 
-procedure TDM.cdsTiposDeOperacaoAfterPost(DataSet: TDataSet);
-begin
-  (DataSet as TClientDataSet).ApplyUpdates(0);
-  (Dataset as TClientDataSet).Refresh;
-end;
-
 procedure TDM.cdsTransportadoresAfterDelete(DataSet: TDataSet);
 begin
   (DataSet as TClientDataSet).ApplyUpdates(0);
@@ -1132,7 +1309,8 @@ begin
 
   try
     SQLConexao.Connected := True;
-    FDConnection2.Connected := True;
+    if frmLogin.pconexao <> '' then
+      FDConnection2.Connected := True;
     try
       cdsProdutos.RemoteServer := DSProviderClient;
       cdsProdutos.ProviderName := 'DSPProdutos';
@@ -1247,14 +1425,16 @@ begin
     end;
   end;
 
-
-  try
-    FDConnection1.Connected := True;
-  except on e:exception do
-    begin
-       MessageDlg('O sistema não conseguiu efetuar conexão '+#13+
-                 'com a tabela de .'+#13+
-                 e.Message,mtError,[mbOK],0);
+  if frmLogin.pconexao <> '' then
+  begin
+    try
+      FDConnection1.Connected := True;
+    except on e:exception do
+      begin
+         MessageDlg('O sistema não conseguiu efetuar conexão '+#13+
+                   'com a tabela de .'+#13+
+                   e.Message,mtError,[mbOK],0);
+      end;
     end;
   end;
 end;

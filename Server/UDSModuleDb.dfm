@@ -607,6 +607,14 @@ object DSModuleDb: TDSModuleDb
       FieldName = 'CODIGO'
       Size = 200
     end
+    object SQLDSPedidosItensCOR: TStringField
+      FieldName = 'COR'
+      Size = 50
+    end
+    object SQLDSPedidosItensTAMANHO: TStringField
+      FieldName = 'TAMANHO'
+      Size = 80
+    end
   end
   object SQLDSMovimentacao: TSQLDataSet
     CommandText = 'SELECT * FROM MOVIMENTACOES ORDER BY'#13#10' ID_MOVIMENTACAO'
@@ -938,6 +946,9 @@ object DSModuleDb: TDSModuleDb
     object SQLDSClientesCIDADE: TStringField
       FieldName = 'CIDADE'
       Size = 100
+    end
+    object SQLDSClientesCODMUNICIPIO: TIntegerField
+      FieldName = 'CODMUNICIPIO'
     end
   end
   object SQLDSFornecedores: TSQLDataSet
@@ -1363,6 +1374,13 @@ object DSModuleDb: TDSModuleDb
     object SQLDSNotasFiscaisMOTIVO_CANCELAMENTO: TStringField
       FieldName = 'MOTIVO_CANCELAMENTO'
       Size = 255
+    end
+    object SQLDSNotasFiscaisCFOP: TIntegerField
+      FieldName = 'CFOP'
+    end
+    object SQLDSNotasFiscaisCFOPDESCRICAO: TStringField
+      FieldName = 'CFOPDESCRICAO'
+      Size = 300
     end
   end
   object DSPNotasFiscais: TDataSetProvider
@@ -2117,6 +2135,14 @@ object DSModuleDb: TDSModuleDb
       FieldName = 'ORIGEM_MERCADORIA'
       Size = 1
     end
+    object SQLDSNotasFiscaisItensCOR: TStringField
+      FieldName = 'COR'
+      Size = 50
+    end
+    object SQLDSNotasFiscaisItensTAMANHO: TStringField
+      FieldName = 'TAMANHO'
+      Size = 80
+    end
   end
   object DSPNotasFiscaisItens: TDataSetProvider
     DataSet = SQLDSNotasFiscaisItens
@@ -2295,6 +2321,18 @@ object DSModuleDb: TDSModuleDb
     end
     object SQLDSTipoOperacaoNUMERO_BASE_CALCULO_ICMS_ST: TIntegerField
       FieldName = 'NUMERO_BASE_CALCULO_ICMS_ST'
+    end
+    object SQLDSTipoOperacaoALIQUOTA_IPI: TFMTBCDField
+      FieldName = 'ALIQUOTA_IPI'
+      Size = 18
+    end
+    object SQLDSTipoOperacaoALIQUOTA_PIS: TFMTBCDField
+      FieldName = 'ALIQUOTA_PIS'
+      Size = 18
+    end
+    object SQLDSTipoOperacaoALIQUOTA_COFINS: TFMTBCDField
+      FieldName = 'ALIQUOTA_COFINS'
+      Size = 18
     end
   end
   object DSPTipoOperacao: TDataSetProvider
@@ -2744,74 +2782,39 @@ object DSModuleDb: TDSModuleDb
     Left = 392
     Top = 597
   end
-  object ACBrNFe1: TACBrNFe
-    Configuracoes.Geral.SSLLib = libCapicomDelphiSoap
-    Configuracoes.Geral.SSLCryptLib = cryCapicom
-    Configuracoes.Geral.SSLHttpLib = httpIndy
-    Configuracoes.Geral.SSLXmlSignLib = xsMsXmlCapicom
-    Configuracoes.Geral.FormatoAlerta = 'TAG:%TAGNIVEL% ID:%ID%/%TAG%(%DESCRICAO%) - %MSG%.'
-    Configuracoes.Geral.IncluirQRCodeXMLNFCe = False
-    Configuracoes.Arquivos.OrdenacaoPath = <>
-    Configuracoes.WebServices.UF = 'SP'
-    Configuracoes.WebServices.AguardarConsultaRet = 0
-    Configuracoes.WebServices.QuebradeLinha = '|'
-    DANFE = ACBrNFeDANFEFR1
-    Left = 952
-    Top = 576
+  object SQLDCFOP: TSQLDataSet
+    CommandText = 'SELECT * FROM CFOP ORDER BY CODIGO'
+    MaxBlobSize = -1
+    Params = <>
+    SQLConnection = SQLConexao
+    Left = 869
+    Top = 207
+    object SQLDCFOPID: TIntegerField
+      FieldName = 'ID'
+      Required = True
+    end
+    object SQLDCFOPCODIGO: TIntegerField
+      FieldName = 'CODIGO'
+    end
+    object SQLDCFOPDESCRICAO: TStringField
+      FieldName = 'DESCRICAO'
+      Size = 300
+    end
+    object SQLDCFOPCFOPENTRADA: TIntegerField
+      FieldName = 'CFOPENTRADA'
+    end
+    object SQLDCFOPTIPO: TSmallintField
+      FieldName = 'TIPO'
+    end
+    object SQLDCFOPAPLICACAO: TStringField
+      FieldName = 'APLICACAO'
+      Size = 2000
+    end
   end
-  object ACBrNFeDANFEFR1: TACBrNFeDANFEFR
-    ACBrNFe = ACBrNFe1
-    MostrarPreview = True
-    MostrarStatus = True
-    TipoDANFE = tiSemGeracao
-    NumCopias = 1
-    ImprimeNomeFantasia = False
-    ImprimirDescPorc = False
-    ImprimirTotalLiquido = True
-    MargemInferior = 0.800000000000000000
-    MargemSuperior = 0.800000000000000000
-    MargemEsquerda = 0.600000000000000000
-    MargemDireita = 0.510000000000000000
-    CasasDecimais.Formato = tdetInteger
-    CasasDecimais._qCom = 2
-    CasasDecimais._vUnCom = 2
-    CasasDecimais._Mask_qCom = ',0.00'
-    CasasDecimais._Mask_vUnCom = ',0.00'
-    ExibirResumoCanhoto = False
-    FormularioContinuo = False
-    TamanhoFonte_DemaisCampos = 8
-    ProdutosPorPagina = 0
-    ImprimirDetalhamentoEspecifico = True
-    NFeCancelada = False
-    ImprimirItens = True
-    ViaConsumidor = True
-    TamanhoLogoHeight = 0
-    TamanhoLogoWidth = 0
-    RecuoEndereco = 0
-    RecuoEmpresa = 0
-    LogoemCima = False
-    TamanhoFonteEndereco = 0
-    RecuoLogo = 0
-    EspessuraBorda = 1
-    ExibirTotalTributosItem = False
-    ExibeCampoFatura = True
-    TributosPercentual = ptValorProdutos
-    ImprimirUnQtVlComercial = iuComercial
-    Detalhado = False
-    DescricaoViaEstabelec = 'Via do Consumidor'
-    ExpandirDadosAdicionaisAuto = False
-    ImprimirDadosArma = True
-    QuebraLinhaEmDetalhamentoEspecifico = True
-    IncorporarBackgroundPdf = True
-    IncorporarFontesPdf = True
-    ImprimirDadosDocReferenciados = True
-    Left = 40
-    Top = 80
-  end
-  object ACBrIBGE1: TACBrIBGE
-    ProxyPort = '8080'
-    CacheArquivo = 'ACBrIBGE.txt'
-    Left = 144
-    Top = 104
+  object DSPCFOP: TDataSetProvider
+    DataSet = SQLDCFOP
+    Options = [poAutoRefresh, poAllowCommandText, poUseQuoteChar]
+    Left = 869
+    Top = 262
   end
 end

@@ -317,7 +317,7 @@ object frmConfiguracoes: TfrmConfiguracoes
     ParentColor = False
     ParentFont = False
     TabOrder = 2
-    Properties.ActivePage = cxTSConfiguracoesConexao
+    Properties.ActivePage = cxTSConfiguracoesNFe
     Properties.CustomButtons.Buttons = <>
     LookAndFeel.NativeStyle = False
     ClientRectBottom = 843
@@ -326,6 +326,9 @@ object frmConfiguracoes: TfrmConfiguracoes
     object cxTSConfiguracoesConexao: TcxTabSheet
       Caption = 'Configura'#231#245'es'
       ImageIndex = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GroupBox2: TGroupBox
         Left = 376
         Top = 0
@@ -713,7 +716,6 @@ object frmConfiguracoes: TfrmConfiguracoes
           Align = alTop
           Caption = 'Impressora Fiscal'
           TabOrder = 0
-          ExplicitLeft = 1
           object lbl1: TLabel
             Left = 8
             Top = 18
@@ -935,6 +937,10 @@ object frmConfiguracoes: TfrmConfiguracoes
             Font.Name = 'Segoe UI'
             Font.Style = []
             ParentFont = False
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             DesignSize = (
               727
               177)
@@ -1126,6 +1132,10 @@ object frmConfiguracoes: TfrmConfiguracoes
             Font.Style = []
             ImageIndex = 1
             ParentFont = False
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             DesignSize = (
               727
               177)
@@ -1180,6 +1190,9 @@ object frmConfiguracoes: TfrmConfiguracoes
     object cxTSConfiguracoesNFe: TcxTabSheet
       Caption = 'Configura'#231#245'es NF-e'
       ImageIndex = 1
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object cxPageControl1: TcxPageControl
         Left = 0
         Top = 42
@@ -1201,7 +1214,96 @@ object frmConfiguracoes: TfrmConfiguracoes
         ClientRectTop = 24
         object cxTabSheet1: TcxTabSheet
           Caption = '1 - Geral'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Segoe UI'
+          Font.Style = []
           ImageIndex = 0
+          ParentFont = False
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
+          object lSSLLib: TLabel
+            Left = 46
+            Top = 244
+            Width = 34
+            Height = 13
+            Alignment = taRightJustify
+            Caption = 'SSLLib'
+            Color = clWhite
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindow
+            Font.Height = -11
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            ParentColor = False
+            ParentFont = False
+          end
+          object lCryptLib: TLabel
+            Left = 36
+            Top = 271
+            Width = 44
+            Height = 13
+            Alignment = taRightJustify
+            Caption = 'CryptLib'
+            Color = clWhite
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindow
+            Font.Height = -11
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            ParentColor = False
+            ParentFont = False
+          end
+          object lHttpLib: TLabel
+            Left = 41
+            Top = 298
+            Width = 39
+            Height = 13
+            Alignment = taRightJustify
+            Caption = 'HttpLib'
+            Color = clWhite
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindow
+            Font.Height = -11
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            ParentColor = False
+            ParentFont = False
+          end
+          object lXmlSign: TLabel
+            Left = 17
+            Top = 325
+            Width = 63
+            Height = 13
+            Alignment = taRightJustify
+            Caption = 'XMLSignLib'
+            Color = clWhite
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindow
+            Font.Height = -11
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            ParentColor = False
+            ParentFont = False
+          end
+          object lSSLLib1: TLabel
+            Left = 37
+            Top = 352
+            Width = 42
+            Height = 13
+            Alignment = taRightJustify
+            Caption = 'SSLType'
+            Color = clBtnFace
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindow
+            Font.Height = -11
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            ParentColor = False
+            ParentFont = False
+          end
           object RadioFormas: TcxRadioGroup
             Left = 8
             Top = 14
@@ -1238,7 +1340,7 @@ object frmConfiguracoes: TfrmConfiguracoes
             StyleHot.LookAndFeel.NativeStyle = False
             TabOrder = 0
             Height = 70
-            Width = 361
+            Width = 385
           end
           object chArquivos: TcxCheckBox
             Left = 8
@@ -1320,8 +1422,8 @@ object frmConfiguracoes: TfrmConfiguracoes
             end
           end
           object GBUltimoNumeroNFe: TcxGroupBox
-            Left = 8
-            Top = 232
+            Left = 408
+            Top = 16
             Caption = 'N'#186' '#250'ltima NF-e'
             TabOrder = 4
             Height = 44
@@ -1334,10 +1436,100 @@ object frmConfiguracoes: TfrmConfiguracoes
               TabOrder = 0
             end
           end
+          object cbSSLLib: TComboBox
+            Left = 91
+            Top = 236
+            Width = 160
+            Height = 21
+            Style = csDropDownList
+            TabOrder = 5
+          end
+          object cbCryptLib: TComboBox
+            Left = 91
+            Top = 263
+            Width = 160
+            Height = 21
+            Style = csDropDownList
+            TabOrder = 6
+          end
+          object cbHttpLib: TComboBox
+            Left = 91
+            Top = 290
+            Width = 160
+            Height = 21
+            Style = csDropDownList
+            TabOrder = 7
+          end
+          object cbXmlSignLib: TComboBox
+            Left = 91
+            Top = 317
+            Width = 160
+            Height = 21
+            Style = csDropDownList
+            TabOrder = 8
+          end
+          object cbSSLType: TComboBox
+            Left = 91
+            Top = 344
+            Width = 160
+            Height = 21
+            Hint = 'Depende de configura'#231#227'o de  SSL.HttpLib'
+            Style = csDropDownList
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'MS Sans Serif'
+            Font.Style = []
+            ParentFont = False
+            TabOrder = 9
+          end
+          object cxGroupBox11: TcxGroupBox
+            Left = 408
+            Top = 92
+            Caption = 'Modelo Documento Fiscal'
+            Style.LookAndFeel.NativeStyle = False
+            StyleDisabled.LookAndFeel.NativeStyle = False
+            StyleFocused.LookAndFeel.NativeStyle = False
+            StyleHot.LookAndFeel.NativeStyle = False
+            TabOrder = 10
+            Height = 47
+            Width = 385
+            object cbModeloDF: TComboBox
+              Left = 9
+              Top = 17
+              Width = 248
+              Height = 21
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -11
+              Font.Name = 'MS Sans Serif'
+              Font.Style = []
+              ParentFont = False
+              TabOrder = 0
+            end
+          end
+          object cxGroupBox12: TcxGroupBox
+            Left = 557
+            Top = 16
+            Caption = 'N'#186' NF-e'
+            TabOrder = 11
+            Height = 44
+            Width = 137
+            object edtNumeroNFe: TEdit
+              Left = 8
+              Top = 16
+              Width = 121
+              Height = 21
+              TabOrder = 0
+            end
+          end
         end
         object cxTabSheet2: TcxTabSheet
           Caption = '2 - Certificado'
           ImageIndex = 1
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object cxGroupBox6: TcxGroupBox
             Left = 8
             Top = 8
@@ -1417,6 +1609,9 @@ object frmConfiguracoes: TfrmConfiguracoes
         object cxTabSheet3: TcxTabSheet
           Caption = '3 - Emitente'
           ImageIndex = 2
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object EdtCodMun: TEdit
             Left = 88
             Top = 216
@@ -2099,7 +2294,7 @@ object frmConfiguracoes: TfrmConfiguracoes
     Style.Font.Name = 'Tahoma'
     Style.Font.Style = []
     Style.IsFontAssigned = True
-    Left = 156
+    Left = 572
     Top = 506
     PixelsPerInch = 96
   end

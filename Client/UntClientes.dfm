@@ -390,9 +390,9 @@ object frmClientes: TfrmClientes
     Align = alTop
     TabOrder = 3
     object Gauge1: TGauge
-      Left = 782
+      Left = 930
       Top = 9
-      Width = 193
+      Width = 144
       Height = 25
       Progress = 0
       Visible = False
@@ -439,7 +439,7 @@ object frmClientes: TfrmClientes
     object edtClientes: TEdit
       Left = 364
       Top = 14
-      Width = 295
+      Width = 249
       Height = 21
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
@@ -451,7 +451,7 @@ object frmClientes: TfrmClientes
       OnChange = edtClientesChange
     end
     object BtImportar: TcxButton
-      Left = 665
+      Left = 829
       Top = 10
       Width = 100
       Height = 25
@@ -459,11 +459,43 @@ object frmClientes: TfrmClientes
       TabOrder = 3
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -19
+      Font.Height = -13
       Font.Name = 'Segoe UI'
       Font.Style = []
       ParentFont = False
       OnClick = BtImportarClick
+    end
+    object cxButton1: TcxButton
+      Left = 619
+      Top = 10
+      Width = 100
+      Height = 25
+      Caption = 'Busca CNPj/CPF'
+      Enabled = False
+      TabOrder = 4
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
+      OnClick = cxButton1Click
+    end
+    object cxButton3: TcxButton
+      Left = 723
+      Top = 10
+      Width = 100
+      Height = 25
+      Caption = 'Busca Cep'
+      Enabled = False
+      TabOrder = 5
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
+      OnClick = cxButton3Click
     end
   end
   object cxpcClientes: TcxPageControl
@@ -539,7 +571,7 @@ object frmClientes: TfrmClientes
         Caption = 'Bairro'
       end
       object cxLabel11: TcxLabel
-        Left = 355
+        Left = 507
         Top = 173
         Caption = 'Telefone'
       end
@@ -554,7 +586,7 @@ object frmClientes: TfrmClientes
         Caption = 'E-mail Danfe'
       end
       object cxLabel14: TcxLabel
-        Left = 598
+        Left = 674
         Top = 173
         Caption = 'Celular'
       end
@@ -582,7 +614,7 @@ object frmClientes: TfrmClientes
         TabOrder = 5
         Width = 121
       end
-      object cxDBTextEdit4: TcxDBTextEdit
+      object cxDBCep: TcxDBTextEdit
         Left = 441
         Top = 135
         DataBinding.DataField = 'CEP'
@@ -631,20 +663,20 @@ object frmClientes: TfrmClientes
         Width = 323
       end
       object cxDBTextEdit10: TcxDBTextEdit
-        Left = 598
+        Left = 674
         Top = 192
         DataBinding.DataField = 'CELULAR'
         DataBinding.DataSource = DM.dsClientes
         TabOrder = 13
-        Width = 219
+        Width = 141
       end
       object cxDBTextEdit11: TcxDBTextEdit
-        Left = 355
+        Left = 507
         Top = 192
         DataBinding.DataField = 'TELEFONE'
         DataBinding.DataSource = DM.dsClientes
         TabOrder = 12
-        Width = 237
+        Width = 150
       end
       object cxDBTextEdit13: TcxDBTextEdit
         Left = 83
@@ -722,6 +754,19 @@ object frmClientes: TfrmClientes
         Top = 173
         Caption = 'Cidade'
       end
+      object cxLabel19: TcxLabel
+        Left = 359
+        Top = 173
+        Caption = 'C'#243'digo Munic'#237'pio'
+      end
+      object cxDBTextEdit6: TcxDBTextEdit
+        Left = 359
+        Top = 192
+        DataBinding.DataField = 'CODMUNICIPIO'
+        DataBinding.DataSource = DM.dsClientes
+        TabOrder = 36
+        Width = 127
+      end
     end
   end
   object ActionList1: TActionList
@@ -744,5 +789,12 @@ object frmClientes: TfrmClientes
             GestureID = sgiUp
           end>
       end>
+  end
+  object ACBrCEP1: TACBrCEP
+    ProxyPort = '8080'
+    PesquisarIBGE = True
+    OnBuscaEfetuada = ACBrCEP1BuscaEfetuada
+    Left = 384
+    Top = 40
   end
 end

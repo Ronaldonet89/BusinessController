@@ -27,8 +27,8 @@ object frmTransportadores: TfrmTransportadores
     object Label1: TLabel
       Left = 96
       Top = -9
-      Width = 382
-      Height = 70
+      Width = 376
+      Height = 74
       Caption = 'Transportadores'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -262,8 +262,6 @@ object frmTransportadores: TfrmTransportadores
     StyleFocused.LookAndFeel.NativeStyle = False
     StyleHot.LookAndFeel.NativeStyle = False
     TabOrder = 3
-    ExplicitTop = 367
-    ExplicitHeight = 200
     Height = 191
     Width = 856
     object DBEdit1: TDBEdit

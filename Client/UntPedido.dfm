@@ -268,7 +268,7 @@ object frmPedidos: TfrmPedidos
       OnClick = cxbtnRelatoriosClick
     end
     object BtImportar: TcxButton
-      Left = 793
+      Left = 791
       Top = 12
       Width = 100
       Height = 25
@@ -297,7 +297,7 @@ object frmPedidos: TfrmPedidos
     Font.Style = []
     ParentFont = False
     TabOrder = 1
-    Properties.ActivePage = cxTSPesquisa
+    Properties.ActivePage = cxTSInserirDados
     Properties.CustomButtons.Buttons = <
       item
       end>
@@ -310,6 +310,9 @@ object frmPedidos: TfrmPedidos
     object cxTSPesquisa: TcxTabSheet
       Caption = 'cxTSPesquisa'
       ImageIndex = 0
+      ExplicitLeft = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object cxGBEdicao: TcxGroupBox
         Left = 0
         Top = 0
@@ -345,7 +348,7 @@ object frmPedidos: TfrmPedidos
         Height = 589
         Align = alClient
         TabOrder = 1
-        Properties.ActivePage = cxtspedidos
+        Properties.ActivePage = cxtsclientes
         Properties.CustomButtons.Buttons = <>
         Properties.TabPosition = tpLeft
         LookAndFeel.NativeStyle = False
@@ -357,6 +360,9 @@ object frmPedidos: TfrmPedidos
           Caption = 'cxtspedidos'
           ImageIndex = 0
           OnShow = cxtspedidosShow
+          ExplicitLeft = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object cxGridPedidos: TcxGrid
             Left = 0
             Top = 0
@@ -426,6 +432,9 @@ object frmPedidos: TfrmPedidos
           Caption = 'cxtsclientes'
           ImageIndex = 1
           OnShow = cxtsclientesShow
+          ExplicitLeft = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object cxGridClientes: TcxGrid
             Left = 0
             Top = 0
@@ -433,6 +442,7 @@ object frmPedidos: TfrmPedidos
             Height = 589
             Align = alClient
             TabOrder = 0
+            LockedStateImageOptions.AssignedValues = [lsiavColor]
             LookAndFeel.NativeStyle = False
             object cxGridClientesDBTableView1: TcxGridDBTableView
               OnKeyDown = cxGridClientesDBTableView1KeyDown
@@ -477,6 +487,9 @@ object frmPedidos: TfrmPedidos
     object cxTSInserirDados: TcxTabSheet
       Caption = 'cxTSInserirDados'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object pnlPrincipal: TPanel
         Left = 0
         Top = 0
@@ -632,6 +645,7 @@ object frmPedidos: TfrmPedidos
               object cxGridProdutosDBTableView1: TcxGridDBTableView
                 OnKeyDown = cxGridProdutosDBTableView1KeyDown
                 Navigator.Buttons.CustomButtons = <>
+                DataController.DataSource = DM.dsProdutos
                 DataController.Summary.DefaultGroupSummaryItems = <>
                 DataController.Summary.FooterSummaryItems = <>
                 DataController.Summary.SummaryGroups = <>

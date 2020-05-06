@@ -95,8 +95,8 @@ object frmlookUpFormaPagamento: TfrmlookUpFormaPagamento
       Transparent = True
     end
     object cxButton2: TcxButton
-      Left = 681
-      Top = 9
+      Left = 679
+      Top = 8
       Width = 59
       Height = 29
       Caption = 'Excluir'

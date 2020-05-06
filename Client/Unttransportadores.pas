@@ -21,7 +21,7 @@ uses
   cxDBData, cxContainer, cxLabel, Vcl.StdCtrls, Vcl.Mask, Vcl.DBCtrls,
   cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxGroupBox,
   cxGridLevel, cxClasses, cxGridCustomView, cxGrid, Vcl.Imaging.pngimage,
-  Vcl.ExtCtrls, cxDBNavigator;
+  Vcl.ExtCtrls, cxDBNavigator, System.UITypes;
 
 type
   TfrmTransportadores = class(TForm)

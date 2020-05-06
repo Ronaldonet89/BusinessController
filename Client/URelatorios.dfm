@@ -3,7 +3,7 @@
   Top = 90
   Caption = 'HeadSystem'
   ClientHeight = 610
-  ClientWidth = 903
+  ClientWidth = 1260
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -565,8 +565,8 @@
     end
   end
   object QRComandas: TQuickRep
-    Left = 816
-    Top = 64
+    Left = 32
+    Top = 343
     Width = 794
     Height = 1123
     Font.Charset = DEFAULT_CHARSET
@@ -863,8 +863,8 @@
     end
   end
   object QRRelatorioGerencial: TQuickRep
-    Left = 861
-    Top = 8
+    Left = 77
+    Top = 352
     Width = 794
     Height = 1123
     DataSet = cdsRelatorioGerencial
@@ -1315,7 +1315,7 @@
       Left = 12
       Top = 32
       Width = 381
-      Height = 39
+      Height = 19
       CharCase = ecUpperCase
       Ctl3D = False
       Font.Charset = DEFAULT_CHARSET
@@ -1333,7 +1333,7 @@
       Left = 247
       Top = 178
       Width = 106
-      Height = 31
+      Height = 19
       CharCase = ecUpperCase
       Ctl3D = False
       Font.Charset = DEFAULT_CHARSET
@@ -1350,7 +1350,7 @@
       Left = 13
       Top = 94
       Width = 381
-      Height = 39
+      Height = 19
       CharCase = ecUpperCase
       Ctl3D = False
       Font.Charset = DEFAULT_CHARSET

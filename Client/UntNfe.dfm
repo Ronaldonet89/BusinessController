@@ -193,10 +193,12 @@ object frmNfe: TfrmNfe
         object cxGridNotasFiscaisDBTableView1: TcxGridDBTableView
           OnKeyDown = cxGridNotasFiscaisDBTableView1KeyDown
           Navigator.Buttons.CustomButtons = <>
+          OnCustomDrawCell = cxGridNotasFiscaisDBTableView1CustomDrawCell
           DataController.DataSource = DM.dsNotasFiscais
           DataController.Summary.DefaultGroupSummaryItems = <>
           DataController.Summary.FooterSummaryItems = <>
           DataController.Summary.SummaryGroups = <>
+          Styles.OnGetContentStyle = cxGridNotasFiscaisDBTableView1StylesGetContentStyle
           object cxGridNotasFiscaisDBTableView1ID_NOTA_FISCAL: TcxGridDBColumn
             Caption = 'Identifica'#231#227'o'
             DataBinding.FieldName = 'ID_NOTA_FISCAL'
@@ -241,6 +243,10 @@ object frmNfe: TfrmNfe
             Caption = 'Data/Hora Recebimento NF-e'
             DataBinding.FieldName = 'DATA_HORA_RECEBIMENTO'
             Width = 130
+          end
+          object cxGridNotasFiscaisDBTableView1DATA_HORA_CANCELAMENTO: TcxGridDBColumn
+            Caption = 'Data Cancelamento'
+            DataBinding.FieldName = 'DATA_HORA_CANCELAMENTO'
           end
         end
         object cxGridNotasFiscaisLevel1: TcxGridLevel
@@ -322,7 +328,7 @@ object frmNfe: TfrmNfe
             OnClick = cxBtnEnviarNFeClick
           end
           object cxButton1: TcxButton
-            Left = 424
+            Left = 428
             Top = 13
             Width = 113
             Height = 25
@@ -332,7 +338,7 @@ object frmNfe: TfrmNfe
             OnClick = cxButton1Click
           end
           object cxBtnEfetuarCalculo: TcxButton
-            Left = 325
+            Left = 328
             Top = 13
             Width = 89
             Height = 25
@@ -340,6 +346,46 @@ object frmNfe: TfrmNfe
             LookAndFeel.NativeStyle = False
             TabOrder = 3
             OnClick = cxBtnEfetuarCalculoClick
+          end
+          object cxButton9: TcxButton
+            Left = 666
+            Top = 13
+            Width = 113
+            Height = 25
+            Caption = 'Cancelar Nota'
+            LookAndFeel.NativeStyle = False
+            TabOrder = 4
+            OnClick = cxButton9Click
+          end
+          object cxButton10: TcxButton
+            Left = 547
+            Top = 13
+            Width = 113
+            Height = 25
+            Caption = 'Imprimir Danfe'
+            LookAndFeel.NativeStyle = False
+            TabOrder = 5
+            OnClick = cxButton10Click
+          end
+          object cxButton11: TcxButton
+            Left = 786
+            Top = 13
+            Width = 113
+            Height = 25
+            Caption = 'Inutilizar Nota'
+            LookAndFeel.NativeStyle = False
+            TabOrder = 6
+            OnClick = cxButton11Click
+          end
+          object cxButton12: TcxButton
+            Left = 905
+            Top = 13
+            Width = 113
+            Height = 25
+            Caption = 'Carta Corre'#231#227'o'
+            LookAndFeel.NativeStyle = False
+            TabOrder = 7
+            OnClick = cxButton12Click
           end
         end
         object cxPCNotasFiscais: TcxPageControl
@@ -349,7 +395,7 @@ object frmNfe: TfrmNfe
           Height = 232
           Align = alClient
           TabOrder = 1
-          Properties.ActivePage = cxTSPrincipal
+          Properties.ActivePage = cxTSNotaFiscalImpostos
           Properties.CustomButtons.Buttons = <>
           ClientRectBottom = 228
           ClientRectLeft = 4
@@ -404,7 +450,7 @@ object frmNfe: TfrmNfe
               DataBinding.DataField = 'NATUREZA_DE_OPERACAO'
               DataBinding.DataSource = DM.dsNotasFiscais
               TabOrder = 5
-              Width = 225
+              Width = 269
             end
             object cxLabel4: TcxLabel
               Left = 508
@@ -427,7 +473,7 @@ object frmNfe: TfrmNfe
             end
             object cxDBTextEdit1: TcxDBTextEdit
               Left = 439
-              Top = 30
+              Top = 31
               DataBinding.DataField = 'HORA_SAIDA_ENTRADA'
               DataBinding.DataSource = DM.dsNotasFiscais
               Properties.ReadOnly = True
@@ -441,7 +487,7 @@ object frmNfe: TfrmNfe
             end
             object cxDBRadioGroup1: TcxDBRadioGroup
               Left = 5
-              Top = 56
+              Top = 102
               Caption = 'Tipo NF-e'
               DataBinding.DataField = 'ENTRADA_SAIDA'
               DataBinding.DataSource = DM.dsNotasFiscais
@@ -460,7 +506,7 @@ object frmNfe: TfrmNfe
             end
             object cxDBRadioGroup2: TcxDBRadioGroup
               Left = 79
-              Top = 56
+              Top = 102
               Caption = 'Finalidade de emiss'#227'o'
               DataBinding.DataField = 'INFORMACAO_NFE'
               DataBinding.DataSource = DM.dsNotasFiscais
@@ -489,7 +535,7 @@ object frmNfe: TfrmNfe
             end
             object cxDBRadioGroup3: TcxDBRadioGroup
               Left = 286
-              Top = 56
+              Top = 102
               Caption = 'Frete'
               DataBinding.DataField = 'RESPONSAVEL_FRETE'
               DataBinding.DataSource = DM.dsNotasFiscais
@@ -516,12 +562,12 @@ object frmNfe: TfrmNfe
               Width = 174
             end
             object cxLabel21: TcxLabel
-              Left = 795
+              Left = 821
               Top = 7
               Caption = 'Valor Produtos'
             end
             object cxDBTextEdit7: TcxDBTextEdit
-              Left = 795
+              Left = 821
               Top = 31
               DataBinding.DataField = 'VALOR_PRODUTOS'
               DataBinding.DataSource = DM.dsNotasFiscais
@@ -530,13 +576,13 @@ object frmNfe: TfrmNfe
               Width = 118
             end
             object cxLabel31: TcxLabel
-              Left = 919
-              Top = 7
+              Left = 821
+              Top = 57
               Caption = 'Valor NF-e'
             end
             object cxDBTextEdit16: TcxDBTextEdit
-              Left = 919
-              Top = 30
+              Left = 821
+              Top = 77
               DataBinding.DataField = 'VALOR_TOTAL_NOTA'
               DataBinding.DataSource = DM.dsNotasFiscais
               Properties.ReadOnly = True
@@ -545,7 +591,7 @@ object frmNfe: TfrmNfe
             end
             object cxLabel49: TcxLabel
               Left = 466
-              Top = 58
+              Top = 98
               Caption = 'Forma Pagamento'
               Style.LookAndFeel.NativeStyle = False
               StyleDisabled.LookAndFeel.NativeStyle = False
@@ -553,8 +599,8 @@ object frmNfe: TfrmNfe
               StyleHot.LookAndFeel.NativeStyle = False
             end
             object cxLabel50: TcxLabel
-              Left = 625
-              Top = 58
+              Left = 601
+              Top = 98
               Caption = 'Cond.Pagamento'
               Style.LookAndFeel.NativeStyle = False
               StyleDisabled.LookAndFeel.NativeStyle = False
@@ -562,8 +608,8 @@ object frmNfe: TfrmNfe
               StyleHot.LookAndFeel.NativeStyle = False
             end
             object cxdbtNumeroParcelas: TcxDBTextEdit
-              Left = 793
-              Top = 81
+              Left = 750
+              Top = 121
               HelpType = htKeyword
               DataBinding.DataField = 'NUMERO_PARCELAS'
               DataBinding.DataSource = DM.dsNotasFiscais
@@ -575,8 +621,8 @@ object frmNfe: TfrmNfe
               Width = 61
             end
             object cxLabel51: TcxLabel
-              Left = 793
-              Top = 58
+              Left = 750
+              Top = 98
               Caption = 'N'#186' Parcelas'
               Style.LookAndFeel.NativeStyle = False
               StyleDisabled.LookAndFeel.NativeStyle = False
@@ -584,7 +630,7 @@ object frmNfe: TfrmNfe
               StyleHot.LookAndFeel.NativeStyle = False
             end
             object cxButton6: TcxButton
-              Left = 738
+              Left = 784
               Top = 31
               Width = 25
               Height = 21
@@ -595,7 +641,7 @@ object frmNfe: TfrmNfe
             end
             object cxDBTextEdit47: TcxDBTextEdit
               Left = 466
-              Top = 81
+              Top = 121
               HelpType = htKeyword
               DataBinding.DataField = 'FORMA_PAGAMENTO'
               DataBinding.DataSource = DM.dsNotasFiscais
@@ -607,8 +653,8 @@ object frmNfe: TfrmNfe
               Width = 97
             end
             object cxDBTextEdit48: TcxDBTextEdit
-              Left = 625
-              Top = 81
+              Left = 601
+              Top = 121
               HelpType = htKeyword
               DataBinding.DataField = 'CONDICAO_PAGAMENTO'
               DataBinding.DataSource = DM.dsNotasFiscais
@@ -620,8 +666,8 @@ object frmNfe: TfrmNfe
               Width = 116
             end
             object cxButton5: TcxButton
-              Left = 743
-              Top = 81
+              Left = 719
+              Top = 121
               Width = 25
               Height = 21
               Caption = '...'
@@ -631,13 +677,104 @@ object frmNfe: TfrmNfe
             end
             object cxButton7: TcxButton
               Left = 566
-              Top = 81
+              Top = 121
               Width = 25
               Height = 21
               Caption = '...'
               LookAndFeel.NativeStyle = False
               TabOrder = 26
               OnClick = cxButton7Click
+            end
+            object cxDBTextEdit49: TcxDBTextEdit
+              Left = 54
+              Top = 174
+              DataBinding.DataField = 'CFOPDESCRICAO'
+              DataBinding.DataSource = DM.dsNotasFiscais
+              Properties.ReadOnly = True
+              TabOrder = 27
+              Width = 300
+            end
+            object cxButton8: TcxButton
+              Left = 355
+              Top = 174
+              Width = 25
+              Height = 21
+              Caption = '...'
+              LookAndFeel.NativeStyle = False
+              TabOrder = 28
+              OnClick = cxButton8Click
+            end
+            object cxLabel68: TcxLabel
+              Left = 5
+              Top = 157
+              Caption = 'CFOP'
+            end
+            object DBEdit19: TDBEdit
+              Left = 5
+              Top = 174
+              Width = 47
+              Height = 21
+              DataField = 'CFOP'
+              DataSource = DM.dsNotasFiscais
+              ReadOnly = True
+              TabOrder = 30
+              OnChange = DBEdit2Change
+            end
+            object cxLabel69: TcxLabel
+              Left = 3
+              Top = 57
+              Caption = 'Endere'#231'o'
+            end
+            object cxDBTextEdit50: TcxDBTextEdit
+              Left = 4
+              Top = 77
+              DataBinding.DataField = 'ENDERECO'
+              DataBinding.DataSource = DM.dsClientes
+              Properties.ReadOnly = True
+              TabOrder = 32
+              Width = 325
+            end
+            object cxLabel70: TcxLabel
+              Left = 336
+              Top = 57
+              Caption = 'Cidade'
+            end
+            object cxDBTextEdit51: TcxDBTextEdit
+              Left = 336
+              Top = 77
+              DataBinding.DataField = 'CIDADE'
+              DataBinding.DataSource = DM.dsClientes
+              Properties.ReadOnly = True
+              TabOrder = 34
+              Width = 289
+            end
+            object cxLabel71: TcxLabel
+              Left = 633
+              Top = 57
+              Caption = 'UF'
+            end
+            object cxDBTextEdit52: TcxDBTextEdit
+              Left = 633
+              Top = 77
+              DataBinding.DataField = 'UF'
+              DataBinding.DataSource = DM.dsClientes
+              Properties.ReadOnly = True
+              TabOrder = 36
+              Width = 47
+            end
+            object cxLabel72: TcxLabel
+              Left = 687
+              Top = 57
+              Caption = 'C'#243'digo Munic'#237'pio'
+            end
+            object cxDBTextEdit53: TcxDBTextEdit
+              Left = 690
+              Top = 77
+              DataBinding.DataField = 'CODMUNICIPIO'
+              DataBinding.DataSource = DM.dsClientes
+              Properties.ReadOnly = True
+              TabOrder = 38
+              Width = 121
             end
           end
           object cxTSNotaFiscalImpostos: TcxTabSheet
@@ -703,7 +840,7 @@ object frmNfe: TfrmNfe
             object cxDBTextEdit8: TcxDBTextEdit
               Left = 626
               Top = 76
-              DataBinding.DataField = 'VALOR_FRETE'
+              DataBinding.DataField = 'VALOR_COFINS'
               DataBinding.DataSource = DM.dsNotasFiscais
               TabOrder = 9
               Width = 118
@@ -716,7 +853,7 @@ object frmNfe: TfrmNfe
             object cxDBTextEdit14: TcxDBTextEdit
               Left = 5
               Top = 76
-              DataBinding.DataField = 'VALOR_COFINS'
+              DataBinding.DataField = 'VALOR_FRETE'
               DataBinding.DataSource = DM.dsNotasFiscais
               TabOrder = 11
               Width = 118
@@ -765,20 +902,12 @@ object frmNfe: TfrmNfe
               Top = 53
               Caption = 'Valor Desconto'
             end
-            object cxDBTextEdit10: TcxDBTextEdit
-              Left = 378
-              Top = 76
-              DataBinding.DataField = 'VALOR_DESCONTO'
-              DataBinding.DataSource = DM.dsNotasFiscais
-              TabOrder = 19
-              Width = 118
-            end
             object cxDBTextEdit11: TcxDBTextEdit
               Left = 253
               Top = 76
               DataBinding.DataField = 'VALOR_IMPOSTO_IMPORTACAO'
               DataBinding.DataSource = DM.dsNotasFiscais
-              TabOrder = 20
+              TabOrder = 19
               Width = 118
             end
             object cxLabel27: TcxLabel
@@ -791,7 +920,7 @@ object frmNfe: TfrmNfe
               Top = 26
               DataBinding.DataField = 'BASE_ST'
               DataBinding.DataSource = DM.dsNotasFiscais
-              TabOrder = 22
+              TabOrder = 21
               Width = 118
             end
             object cxLabel19: TcxLabel
@@ -812,7 +941,7 @@ object frmNfe: TfrmNfe
               DataField = 'NUMERO_NOTA_FISCAL'
               DataSource = DM.dsNotasFiscais
               ReadOnly = True
-              TabOrder = 25
+              TabOrder = 24
               OnChange = DBEdit2Change
             end
             object cxDBTextEdit17: TcxDBTextEdit
@@ -821,7 +950,7 @@ object frmNfe: TfrmNfe
               DataBinding.DataField = 'NOME_CLIENTE'
               DataBinding.DataSource = DM.dsNotasFiscais
               Properties.ReadOnly = True
-              TabOrder = 26
+              TabOrder = 25
               Width = 257
             end
             object cxLabel48: TcxLabel
@@ -840,7 +969,7 @@ object frmNfe: TfrmNfe
               DataBinding.DataField = 'CHAVE'
               DataBinding.DataSource = DM.dsNotasFiscais
               Properties.ReadOnly = True
-              TabOrder = 29
+              TabOrder = 28
               Width = 282
             end
             object cxLabel33: TcxLabel
@@ -854,7 +983,7 @@ object frmNfe: TfrmNfe
               DataBinding.DataField = 'NUMERO_PROTOCOLO_RECEBIMENTO'
               DataBinding.DataSource = DM.dsNotasFiscais
               Properties.ReadOnly = True
-              TabOrder = 31
+              TabOrder = 30
               Width = 282
             end
             object cxLabel34: TcxLabel
@@ -868,7 +997,7 @@ object frmNfe: TfrmNfe
               DataBinding.DataField = 'DATA_HORA_RECEBIMENTO'
               DataBinding.DataSource = DM.dsNotasFiscais
               Properties.ReadOnly = True
-              TabOrder = 33
+              TabOrder = 32
               Width = 282
             end
             object cxLabel35: TcxLabel
@@ -882,8 +1011,16 @@ object frmNfe: TfrmNfe
               DataBinding.DataField = 'MOTIVO_RECEBIMENTO'
               DataBinding.DataSource = DM.dsNotasFiscais
               Properties.ReadOnly = True
-              TabOrder = 35
+              TabOrder = 34
               Width = 282
+            end
+            object cxDBTextEdit54: TcxDBTextEdit
+              Left = 379
+              Top = 76
+              DataBinding.DataField = 'VALOR_DESCONTO'
+              DataBinding.DataSource = DM.dsNotasFiscais
+              TabOrder = 35
+              Width = 118
             end
           end
         end
@@ -951,6 +1088,12 @@ object frmNfe: TfrmNfe
             Width = 1169
             Height = 253
             Align = alClient
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentFont = False
             TabOrder = 1
             Properties.ActivePage = cxTSProdutos
             Properties.CustomButtons.Buttons = <>
@@ -967,6 +1110,7 @@ object frmNfe: TfrmNfe
                 Width = 1085
                 Height = 184
                 Align = alCustom
+                AllowInsert = False
                 DataSource = DM.dsNotasFiscaisItens
                 PanelHeight = 23
                 PanelWidth = 1068
@@ -1049,6 +1193,7 @@ object frmNfe: TfrmNfe
                   Top = 1
                   DataBinding.DataField = 'VALOR_TOTAL'
                   DataBinding.DataSource = DM.dsNotasFiscaisItens
+                  ParentFont = False
                   Style.LookAndFeel.NativeStyle = False
                   StyleDisabled.LookAndFeel.NativeStyle = False
                   StyleFocused.LookAndFeel.NativeStyle = False
@@ -1205,7 +1350,6 @@ object frmNfe: TfrmNfe
                   Width = 49
                   Height = 21
                   DataField = 'CST_ICMS'
-                  DataSource = DM.dsNotasFiscaisItens
                   TabOrder = 3
                 end
                 object DBEdit5: TDBEdit
@@ -1214,7 +1358,6 @@ object frmNfe: TfrmNfe
                   Width = 58
                   Height = 21
                   DataField = 'PERCENTUAL_ICMS'
-                  DataSource = DM.dsNotasFiscaisItens
                   TabOrder = 4
                 end
                 object DBEdit6: TDBEdit
@@ -1223,7 +1366,6 @@ object frmNfe: TfrmNfe
                   Width = 70
                   Height = 21
                   DataField = 'VALOR_ICMS'
-                  DataSource = DM.dsNotasFiscaisItens
                   TabOrder = 5
                 end
               end
@@ -1246,7 +1388,6 @@ object frmNfe: TfrmNfe
                   Width = 49
                   Height = 21
                   DataField = 'CST_IPI'
-                  DataSource = DM.dsNotasFiscaisItens
                   TabOrder = 1
                 end
                 object cxLabel56: TcxLabel
@@ -1260,7 +1401,6 @@ object frmNfe: TfrmNfe
                   Width = 58
                   Height = 21
                   DataField = 'PERCENTUAL_IPI'
-                  DataSource = DM.dsNotasFiscaisItens
                   TabOrder = 3
                 end
                 object cxLabel57: TcxLabel
@@ -1274,7 +1414,6 @@ object frmNfe: TfrmNfe
                   Width = 70
                   Height = 21
                   DataField = 'VALOR_IPI'
-                  DataSource = DM.dsNotasFiscaisItens
                   TabOrder = 5
                 end
               end
@@ -1297,7 +1436,6 @@ object frmNfe: TfrmNfe
                   Width = 49
                   Height = 21
                   DataField = 'CST_PIS'
-                  DataSource = DM.dsNotasFiscaisItens
                   TabOrder = 1
                 end
                 object cxLabel59: TcxLabel
@@ -1311,7 +1449,6 @@ object frmNfe: TfrmNfe
                   Width = 58
                   Height = 21
                   DataField = 'PERCENTUAL_PIS'
-                  DataSource = DM.dsNotasFiscaisItens
                   TabOrder = 3
                 end
                 object cxLabel60: TcxLabel
@@ -1325,7 +1462,6 @@ object frmNfe: TfrmNfe
                   Width = 70
                   Height = 21
                   DataField = 'VALOR_PIS'
-                  DataSource = DM.dsNotasFiscaisItens
                   TabOrder = 5
                 end
               end
@@ -1348,7 +1484,6 @@ object frmNfe: TfrmNfe
                   Width = 49
                   Height = 21
                   DataField = 'CST_COFINS'
-                  DataSource = DM.dsNotasFiscaisItens
                   TabOrder = 1
                 end
                 object cxLabel62: TcxLabel
@@ -1362,7 +1497,6 @@ object frmNfe: TfrmNfe
                   Width = 58
                   Height = 21
                   DataField = 'PERCENTUAL_COFINS'
-                  DataSource = DM.dsNotasFiscaisItens
                   TabOrder = 3
                 end
                 object cxLabel63: TcxLabel
@@ -1376,7 +1510,6 @@ object frmNfe: TfrmNfe
                   Width = 70
                   Height = 21
                   DataField = 'VALOR_COFINS'
-                  DataSource = DM.dsNotasFiscaisItens
                   TabOrder = 5
                 end
               end
@@ -1399,7 +1532,6 @@ object frmNfe: TfrmNfe
                   Width = 49
                   Height = 21
                   DataField = 'CST_ICMS_ST'
-                  DataSource = DM.dsNotasFiscaisItens
                   TabOrder = 1
                 end
                 object cxLabel66: TcxLabel
@@ -1413,7 +1545,6 @@ object frmNfe: TfrmNfe
                   Width = 58
                   Height = 21
                   DataField = 'PERCENTUAL_ICMS_ST'
-                  DataSource = DM.dsNotasFiscaisItens
                   TabOrder = 3
                 end
                 object cxLabel67: TcxLabel
@@ -1427,7 +1558,6 @@ object frmNfe: TfrmNfe
                   Width = 70
                   Height = 21
                   DataField = 'VALOR_ICMS_ST'
-                  DataSource = DM.dsNotasFiscaisItens
                   TabOrder = 5
                 end
               end
@@ -1608,7 +1738,6 @@ object frmNfe: TfrmNfe
             Left = 988
             Top = 82
             DataBinding.DataField = 'UF'
-            DataBinding.DataSource = DM.dsTransportadores
             TabOrder = 7
             Width = 37
           end
@@ -1706,66 +1835,73 @@ object frmNfe: TfrmNfe
       end
     end
   end
+  object OpenDialog1: TOpenDialog
+    Left = 592
+    Top = 8
+  end
+  object cxStyleRepository1: TcxStyleRepository
+    Left = 728
+    Top = 518
+    PixelsPerInch = 96
+  end
   object ACBrNFeDANFEFR1: TACBrNFeDANFEFR
-    MostrarPreview = True
-    MostrarStatus = True
-    TipoDANFE = tiSemGeracao
-    NumCopias = 1
-    ImprimeNomeFantasia = False
-    ImprimirDescPorc = False
-    ImprimirTotalLiquido = False
+    Sistema = 'Projeto ACBr - www.projetoacbr.com.br'
     MargemInferior = 0.800000000000000000
     MargemSuperior = 0.800000000000000000
-    MargemEsquerda = 0.600000000000000000
-    MargemDireita = 0.510000000000000000
+    MargemEsquerda = 6.000000000000000000
+    MargemDireita = 5.100000000000000000
+    ExpandeLogoMarcaConfig.Altura = 0
+    ExpandeLogoMarcaConfig.Esquerda = 0
+    ExpandeLogoMarcaConfig.Topo = 0
+    ExpandeLogoMarcaConfig.Largura = 0
+    ExpandeLogoMarcaConfig.Dimensionar = False
+    ExpandeLogoMarcaConfig.Esticar = True
     CasasDecimais.Formato = tdetInteger
-    CasasDecimais._qCom = 2
-    CasasDecimais._vUnCom = 2
-    CasasDecimais._Mask_qCom = '###,###,###,##0.00'
-    CasasDecimais._Mask_vUnCom = '###,###,###,##0.00'
-    ExibirResumoCanhoto = False
-    FormularioContinuo = False
-    TamanhoFonte_DemaisCampos = 10
-    ProdutosPorPagina = 0
-    ImprimirDetalhamentoEspecifico = True
-    NFeCancelada = False
-    ImprimirItens = True
-    ViaConsumidor = True
-    TamanhoLogoHeight = 0
-    TamanhoLogoWidth = 0
-    RecuoEndereco = 0
-    RecuoEmpresa = 0
-    LogoemCima = False
-    TamanhoFonteEndereco = 0
-    RecuoLogo = 0
+    CasasDecimais.qCom = 2
+    CasasDecimais.vUnCom = 2
+    CasasDecimais.MaskqCom = ',0.00'
+    CasasDecimais.MaskvUnCom = ',0.00'
+    ACBrNFe = ACBrNFe1
     EspessuraBorda = 1
-    ExibirTotalTributosItem = False
-    ExibeCampoFatura = True
-    TributosPercentual = ptValorProdutos
-    ImprimirUnQtVlComercial = iuComercial
-    Detalhado = False
-    DescricaoViaEstabelec = 'Via do Consumidor'
-    ExpandirDadosAdicionaisAuto = False
-    ImprimirDadosArma = True
-    QuebraLinhaEmDetalhamentoEspecifico = True
-    IncorporarBackgroundPdf = True
-    IncorporarFontesPdf = True
-    ImprimirDadosDocReferenciados = True
-    Left = 720
-    Top = 16
+    BorderIcon = [biSystemMenu, biMinimize, biMaximize]
+    Left = 488
+    Top = 8
   end
   object ACBrNFe1: TACBrNFe
-    Configuracoes.Geral.SSLLib = libCapicomDelphiSoap
-    Configuracoes.Geral.SSLCryptLib = cryCapicom
-    Configuracoes.Geral.SSLHttpLib = httpIndy
-    Configuracoes.Geral.SSLXmlSignLib = xsMsXmlCapicom
+    Configuracoes.Geral.SSLLib = libNone
+    Configuracoes.Geral.SSLCryptLib = cryNone
+    Configuracoes.Geral.SSLHttpLib = httpNone
+    Configuracoes.Geral.SSLXmlSignLib = xsNone
     Configuracoes.Geral.FormatoAlerta = 'TAG:%TAGNIVEL% ID:%ID%/%TAG%(%DESCRICAO%) - %MSG%.'
-    Configuracoes.Geral.IncluirQRCodeXMLNFCe = False
+    Configuracoes.Geral.VersaoQRCode = veqr000
     Configuracoes.Arquivos.OrdenacaoPath = <>
     Configuracoes.WebServices.UF = 'SP'
     Configuracoes.WebServices.AguardarConsultaRet = 0
     Configuracoes.WebServices.QuebradeLinha = '|'
-    Left = 808
-    Top = 16
+    Configuracoes.RespTec.IdCSRT = 0
+    DANFE = ACBrNFeDANFEFR1
+    Left = 320
+    Top = 8
+  end
+  object ACBrNFeDANFCEFR1: TACBrNFeDANFCEFR
+    Sistema = 'Projeto ACBr - www.projetoacbr.com.br'
+    MargemInferior = 8.000000000000000000
+    MargemSuperior = 8.000000000000000000
+    MargemEsquerda = 6.000000000000000000
+    MargemDireita = 5.100000000000000000
+    ExpandeLogoMarcaConfig.Altura = 0
+    ExpandeLogoMarcaConfig.Esquerda = 0
+    ExpandeLogoMarcaConfig.Topo = 0
+    ExpandeLogoMarcaConfig.Largura = 0
+    ExpandeLogoMarcaConfig.Dimensionar = False
+    ExpandeLogoMarcaConfig.Esticar = True
+    CasasDecimais.Formato = tdetInteger
+    CasasDecimais.qCom = 2
+    CasasDecimais.vUnCom = 2
+    CasasDecimais.MaskqCom = ',0.00'
+    CasasDecimais.MaskvUnCom = ',0.00'
+    FormularioContinuo = True
+    BorderIcon = [biSystemMenu, biMinimize, biMaximize]
+    Left = 392
   end
 end

@@ -142,6 +142,10 @@ type
     cxLabel23: TcxLabel;
     DBEdit23: TDBEdit;
     cxGrid3DBTableView1CONDICAO_DE_PAGAMENTO: TcxGridDBColumn;
+    cxLabel24: TcxLabel;
+    cxLabel25: TcxLabel;
+    DBEdit24: TDBEdit;
+    DBEdit25: TDBEdit;
     procedure FormShow(Sender: TObject);
     procedure Image2Click(Sender: TObject);
     procedure cxTSFormas_CondicoesShow(Sender: TObject);

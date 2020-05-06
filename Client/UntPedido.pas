@@ -198,10 +198,11 @@ uses GroupedItems1, SplitItemDetail1, UDataModul, ULogin, UntConectaServidor,
 
 procedure TfrmPedidos.BtImportarClick(Sender: TObject);
 var
-  ped,Cod: integer;
+  ped: integer;
   Dat,filtro: string;
 begin
   filtro := 'T';
+  ped:= 0;
   if not inputquery('Importar pedido pelo código ou importar todos','Informe o código do pedido ou digite T para todos ',filtro) then
     abort;
 
@@ -295,13 +296,18 @@ begin
         'VALUES (GEN_ID(NOVA_COMANDA, 1),'+Quotedstr(inttostr(Dm.FDQConsulta.FieldByName('cod_ped').AsInteger+1000) )+')';
         DM.cdsGenerico.Execute;
       end;
+
       with Dm.FDQBusca,Sql do
       begin
         Close;
         Clear;
-        Add('select cod_cesta, cod_prod,codigo, produto,cestapreco, qt,desconto');
-	      Add('  from cesta ');
-	      Add(' where cod_cesta = :cesta and cod_cesta is not null');
+        Add('select ce.cod_cesta, ce.cod_prod,ce.codigo, ce.produto,ce.cestapreco, ce.qt,ce.desconto, ');
+        add('trim(substring((select cor from cor_tam c where c.cod_prod = ce.cod_prod and c.cod_est = ce.cod_est),1,50)) as cor,');
+        add('trim(substring((select tamanho from cor_tam c where c.cod_prod = ce.cod_prod and c.cod_est = ce.cod_est),1,80)) as tamanho  ');
+	      Add('  from cesta ce ');
+        //Add('  left outer join produtos p on (ce.cod_prod = p.cod_prod) ');
+        //Add('  left outer join cor_tam c on (c.cod_prod = p.cod_prod) ');
+	      Add(' where cod_cesta = :cesta and cod_cesta is not null ');
         ParamByName('cesta').AsInteger:= Dm.FDQConsulta.FieldByName('cod_cesta').AsInteger;
         Open;
       end;
@@ -310,7 +316,15 @@ begin
       begin
         Dm.cdsGenerico.Close;
         DM.cdsGenerico.CommandText := 'Select count(*) cont from PEDIDOS_ITENS where id_pedido = '+inttostr(Dm.FDQConsulta.FieldByName('cod_ped').AsInteger+1000)
-        +' and id_produto = '+ Dm.FDQBusca.FieldByName('cod_prod').AsString;
+              +' and id_produto = '+ Dm.FDQBusca.FieldByName('cod_prod').AsString
+              +' and codigo = '+ QuotedStr(Dm.FDQBusca.FieldByName('codigo').AsString);
+
+        if Dm.FDQBusca.FieldByName('cor').AsString <> '' then
+          DM.cdsGenerico.CommandText:= DM.cdsGenerico.CommandText +  ' and substring(cor FROM 1 FOR 50) like '+ QuotedStr('%'+ copy(Dm.FDQBusca.FieldByName('cor').AsString,1,50) +'%');
+
+        if Dm.FDQBusca.FieldByName('tamanho').AsString <> '' then
+          DM.cdsGenerico.CommandText:= DM.cdsGenerico.CommandText + ' and substring(tamanho FROM 1 FOR 80) like ' +QuotedStr('%'+ copy(Dm.FDQBusca.FieldByName('tamanho').AsString,1,80)+'%' );
+
         DM.cdsGenerico.open;
 
         if Dm.cdsGenerico.FieldByName('cont').AsInteger > 0 then
@@ -338,9 +352,9 @@ begin
         begin
           Dm.cdsGenerico.Close;
           DM.cdsGenerico.CommandText := 'INSERT INTO PEDIDOS_ITENS ( ID_PEDIDO_ITEM, ID_PEDIDO, ID_PRODUTO, CODIGO, DESCRICAO_PRODUTO,'+
-          'QUANTIDADE, VALOR_UNITARIO, VALOR_TOTAL,DESCONTO) '+
+          'QUANTIDADE, VALOR_UNITARIO, VALOR_TOTAL,DESCONTO, COR, TAMANHO) '+
           'VALUES (GEN_ID(NOVO_PEDIDO_ITEM, 1), :ID_PEDIDO,:ID_PRODUTO,:CODIGO,:DESCRICAO_PRODUTO, '+
-          ':QUANTIDADE,:VALOR_UNITARIO,:VALOR_TOTAL,:DESCONTO)';
+          ':QUANTIDADE,:VALOR_UNITARIO,:VALOR_TOTAL,:DESCONTO, :COR,:TAMANHO)';
           DM.cdsGenerico.Params.ParambyName('ID_PEDIDO').AsInteger:= (Dm.FDQConsulta.FieldByName('cod_ped').AsInteger+1000);
           DM.cdsGenerico.Params.ParambyName('ID_PRODUTO').AsInteger:= Dm.FDQBusca.FieldByName('cod_prod').AsInteger;
           DM.cdsGenerico.Params.ParambyName('CODIGO').AsString:= TRIM(Copy(Dm.FDQBusca.FieldByName('codigo').AsString,1,200));
@@ -349,6 +363,8 @@ begin
           DM.cdsGenerico.Params.ParambyName('VALOR_UNITARIO').AsFloat:= Dm.FDQBusca.FieldByName('cestapreco').AsFloat;
           DM.cdsGenerico.Params.ParambyName('DESCONTO').AsFloat:= Dm.FDQBusca.FieldByName('desconto').AsFloat;
           DM.cdsGenerico.Params.ParambyName('VALOR_TOTAL').AsFloat:= Dm.FDQBusca.FieldByName('cestapreco').AsFloat * Dm.FDQBusca.FieldByName('qt').AsFloat;
+          DM.cdsGenerico.Params.ParambyName('COR').AsString:= TRIM(Copy(Dm.FDQBusca.FieldByName('cor').AsString,1,50));
+          DM.cdsGenerico.Params.ParambyName('TAMANHO').AsString:= TRIM(Copy(Dm.FDQBusca.FieldByName('tamanho').AsString,1,80));
           DM.cdsGenerico.Execute;
         end;
         Dm.FDQBusca.Next;
@@ -386,18 +402,34 @@ begin
 end;
 
 procedure TfrmPedidos.cxBtnGerarNFeClick(Sender: TObject);
+var
+  //cfop: string;
+  frete, resto, valor : double;
 begin
+  resto:= 0;
+  valor:= 0;
+  frete:= 0;
+  if Ansiuppercase(dm.cdsPedidosSTATUS.AsString) = 'REALIZADA NOTA' then
+  begin
+     MessageDlg('Este pedido de venda está realizado'+#13+
+                 'não podendo ser alterado',mtError,[mbOK],0);
+     dm.cdsPedidos_Itens.CancelUpdates;
+     abort;
+  end;
+
   if not dm.cdsNotasFiscais.Active then
+  BEGIN
     dm.cdsNotasFiscais.Active := true;
+
+  END;
   dm.cdsNotasFiscais.Insert;
   dm.cdsNotasFiscaisID_PEDIDO.AsInteger := dm.cdsPedidosID_PEDIDO.AsInteger;
   dm.cdsNotasFiscaisID_CLIENTE.AsInteger := dm.cdsPedidosID_CLIENTE.AsInteger;
-//  dm.cdsNotasFiscaisNOME_CLIENTE.AsString := dm.cdsPedidosNOME_CLIENTE.AsString;
   dm.cdsNotasFiscaisDATA_EMISSAO.AsDateTime := Date;
-//  dm.cdsNotasFiscaisVALOR_PRODUTOS.AsFloat :=
-//  dm.cdsNotasFiscaisFORMA_PAGAMENTO.AsString := dm.cdsPedidosFORMA_PAGAMENTO.AsString;
-//  dm.cdsNotasFiscaisCONDICAO_PAGAMENTO.AsString := dm.cdsPedidosCONDICAO_PAGAMENTO.AsString;
-//  dm.cdsNotasFiscaisNUMERO_PARCELAS.AsInteger := dm.cdsPedidosNUMERO_PARCELAS.AsInteger;
+  dm.cdsNotasFiscaisVALOR_PRODUTOS.AsFloat :=  dm.cdsPedidosVALOR_TOTAL.AsFloat-dm.cdsPedidosVALOR_FRETE.AsFloat;
+  dm.cdsNotasFiscaisVALOR_FRETE.AsFloat := dm.cdsPedidosVALOR_FRETE.AsFloat;
+  dm.cdsNotasFiscaisVALOR_TOTAL_NOTA.AsFloat:= dm.cdsPedidosVALOR_TOTAL.AsFloat;
+  frete:= dm.cdsPedidosVALOR_FRETE.AsFloat;
   Dm.cdsGenerico.Close;
   DM.cdsGenerico.CommandText :=' SELECT * FROM PEDIDOS_FORMAS_CONDICOES WHERE ID_PEDIDO = ' +inttostr(dm.cdsPedidosID_PEDIDO.AsInteger);
   Dm.cdsGenerico.Open;
@@ -406,13 +438,14 @@ begin
   dm.cdsNotasFiscaisCONDICAO_PAGAMENTO.AsString := Dm.cdsGenerico.FieldByName('CONDICAO_DE_PAGAMENTO').AsString;
 
   dm.cdsNotasFiscaisNUMERO_PARCELAS.AsInteger := 1;
+  dm.cdsNotasFiscaisENTRADA_SAIDA.AsString:= 'S';
+  dm.cdsNotasFiscaisINFORMACAO_NFE.AsString:= 'fnnormal';
 
-
-    dm.cdsClientes.close;
-    dm.cdsClientes.Filtered := False;
-    dm.cdsClientes.Filter := '';
-    dm.cdsClientes.CommandText := 'select * from Clientes where ID_CLIENTE = ' + IntToStr(dm.cdsPedidosID_CLIENTE.AsInteger) + ' order by id_cliente';
-    dm.cdsClientes.open;
+  dm.cdsClientes.close;
+  dm.cdsClientes.Filtered := False;
+  dm.cdsClientes.Filter := '';
+  dm.cdsClientes.CommandText := 'select * from Clientes where ID_CLIENTE = ' + IntToStr(dm.cdsPedidosID_CLIENTE.AsInteger) + ' order by id_cliente';
+  dm.cdsClientes.open;
 
 
   dm.cdsNotasFiscaisNOME_CLIENTE.AsString := dm.cdsClientesRAZAO_SOCIAL.AsString;
@@ -433,6 +466,21 @@ begin
   frmlookUpTiposDeoperacao.ShowModal;
   dm.cdsNotasFiscaisID_NATUREZA_OPERACAO.AsInteger := dm.cdsTiposDeOperacaoID_TIPO_OPERACAO.AsInteger;
   dm.cdsNotasFiscaisNATUREZA_DE_OPERACAO.AsString := DM.cdsTiposDeOperacaoDESCRICAO_TIPO_OPERACAO.AsString;
+
+  dm.cdsProdutos.Close;
+
+  dm.cdsProdutos.CommandText:= 'SELECT * FROM PRODUTOS WHERE COD_PROD = ' + IntToStr(dm.cdsPedidos_ItensID_PRODUTO.AsInteger)+
+    ' AND PRO_CODIGO = ' + QuotedStr( dm.cdsPedidos_ItensCodigo.asstring) +
+    ' ORDER BY PRO_DESCRICAO';
+  dm.cdsProdutos.Open;
+
+  dm.cdsNotasFiscaisCFOP.AsString := dm.cdsProdutos.FieldByName('CFOP').AsString;
+
+  Dm.cdsGenerico.Close;
+  DM.cdsGenerico.CommandText :=' SELECT DESCRICAO FROM CFOP WHERE CODIGO = ' +dm.cdsProdutos.FieldByName('CFOP').AsString;
+  Dm.cdsGenerico.Open;
+
+  dm.cdsNotasFiscaisCFOPDescricao.AsString:= Dm.cdsGenerico.FieldByName('DESCRICAO').AsString;
   dm.cdsNotasFiscais.Post;
 
   if not dm.cdsNotasFiscaisItens.Active then
@@ -453,7 +501,11 @@ begin
   //    dm.cdsPedidos_Itens.close;
   //    dm.cdsPedidos_Itens.Params.ParamByName('ID_PEDIDO').AsInteger := dm.cdsPedidosID_PEDIDO.AsInteger;
   //    dm.cdsPedidos_Itens.Open;
-
+  if frete > 0 then
+  begin
+    valor := frete / dm.cdsPedidos_Itens.RecordCount;
+    Resto := frete - (valor * dm.cdsPedidos_Itens.RecordCount)
+  end;
 
   dm.cdsPedidos_Itens.First;
   while not dm.cdsPedidos_Itens.Eof do
@@ -465,8 +517,11 @@ begin
     dm.cdsNotasFiscaisItensDESCRICAO_PRODUTO.AsString := dm.cdsPedidos_ItensDESCRICAO_PRODUTO.AsString;
     dm.cdsNotasFiscaisItensVALOR_UNITARIO.AsFloat := dm.cdsPedidos_ItensVALOR_UNITARIO.AsFloat;
     dm.cdsNotasFiscaisItensVALOR_DESCONTO.AsFloat := dm.cdsPedidos_ItensDESCONTO.AsFloat;
-    dm.cdsNotasFiscaisItensVALOR_FRETE.AsFloat := 0.00;
+
+    dm.cdsNotasFiscaisItensVALOR_FRETE.AsFloat := valor+Resto;
     dm.cdsNotasFiscaisItensVALOR_SEGURO.AsFloat := 0.00;
+    Resto:= 0;
+    //dm.cdsNotasFiscaisItensORIGEM_MERCADORIA.AsString:= '0';
     dm.cdsProdutos.Close;
     //dm.cdsProdutos.Filtered := False;
     //dm.cdsProdutos.Filter := '';
@@ -481,6 +536,7 @@ begin
     dm.cdsNotasFiscaisItensNCM_PRODUTO.AsString := RetirarPontosETracos(dm.cdsProdutosCODIGO_NCM.AsString);
     dm.cdsNotasFiscaisItensCFOP.AsString := dm.cdsProdutos.FieldByName('CFOP').AsString;
     dm.cdsNotasFiscaisItensUNIDADE.AsString:= dm.cdsProdutosUNIDADE.AsString;
+
 
     Dm.cdsGenerico.Close;
     DM.cdsGenerico.CommandText :=' select * from TIPOS_DE_OPERACAO';
@@ -522,6 +578,8 @@ begin
     dm.cdsNotasFiscaisItensCST_IPI.AsString := Dm.cdsGenerico.FieldByName('CST_IPI').AsString;
     dm.cdsNotasFiscaisItensCST_ICMS.AsString := Dm.cdsGenerico.FieldByName('CST_ICMS_NORMAL').AsString;
     dm.cdsNotasFiscaisItensCST_ICMS_ST.AsString := Dm.cdsGenerico.FieldByName('CST_ICMS_COM_ST').AsString;
+    dm.cdsNotasFiscaisItensPERCENTUAL_COFINS.AsFloat := Dm.cdsGenerico.FieldByName('ALIQUOTA_COFINS').AsFloat;
+    dm.cdsNotasFiscaisItensPERCENTUAL_PIS.AsFloat := Dm.cdsGenerico.FieldByName('ALIQUOTA_PIS').AsFloat;
 
     Dm.cdsGenerico.Close;
     DM.cdsGenerico.CommandText :=' select * from CONVENIOS_NCM';
@@ -530,13 +588,14 @@ begin
     dm.cdsNotasFiscaisItensPERCENTUAL_IPI.AsFloat := Dm.cdsGenerico.FieldByName('ALIQUOTA_IPI').AsFloat;
     dm.cdsNotasFiscaisItensPERCENTUAL_ICMS.AsFloat := Dm.cdsGenerico.FieldByName('ALIQUOTA_ICMS').AsFloat;
 
-     (*
-    dm.cdsNotasFiscaisItensPERCENTUAL_COFINS.AsFloat
-    dm.cdsNotasFiscaisItensPERCENTUAL_PIS.AsFloat
-       *)
     dm.cdsNotasFiscaisItens.Post;
     dm.cdsPedidos_Itens.Next;
   end;
+
+
+  dm.cdsPedidos.Edit;
+  dm.cdsPedidosSTATUS.AsString := 'Realizada Nota';
+  dm.cdsPedidos.post;
   dm.cdsProdutos.Filtered := False;
   dm.cdsProdutos.Filter := '';
   MessageDlg('NF-e gerada com sucesso',mtConfirmation,[mbOK],0);
@@ -684,10 +743,10 @@ begin
 end;
 
 procedure TfrmPedidos.cxBtnrealizarPedidoClick(Sender: TObject);
-var
-  Conexao : TDSModuleDbClient;
-  vString,vStringAuxiliar : string;
-  vContador : integer;
+//var
+  //Conexao : TDSModuleDbClient;
+//  vString,vStringAuxiliar : string;
+//  vContador : integer;
 begin
   if Ansiuppercase(dm.cdsPedidosSTATUS.AsString) <> 'PENDENTE' then
     MessageDlg('Este pedido de compra não está pendente',mtWarning,[mbOK],0)
@@ -793,7 +852,7 @@ begin
       MessageDlg('Erro ao imprimir pedido'+#13+e.Message,mtWarning,[mbOK],0);
     end;
   end;
-  }
+   }
 end;
 
 procedure TfrmPedidos.cxDBNavigator1ButtonsButtonClick(Sender: TObject;
@@ -857,7 +916,7 @@ procedure TfrmPedidos.cxGridClientesDBTableView1KeyDown(Sender: TObject;
   var Key: Word; Shift: TShiftState);
 var
   Conexao : TDSModuleDbClient;
-  vIdPedido : integer;
+ // vIdPedido : integer;
 begin
   if Key = VK_RETURN then
   begin
@@ -873,11 +932,19 @@ begin
 
     dm.cdsPedidos.Insert;
     dm.cdsPedidosID_CLIENTE.AsInteger := dm.cdsClientesID_CLIENTE.AsInteger;
+
 //    DM.cdsPedidosNOME_CLIENTE.AsString := dm.cdsClientesRAZAO_SOCIAL.AsString;
 //    dm.cdsPedidosDATA_PEDIDO.Value := Date;
     Conexao := TDSModuleDbClient.Create(DM.SQLConexao.DBXConnection);
 //    dm.cdsPedidosID_USUARIO.AsInteger := Conexao.RetornaIdentificadorUsuario(frmlogin.pNomeUsuario);
     FreeAndNil(Conexao);
+
+    dm.cdsClientes.close;
+    dm.cdsClientes.Filtered := False;
+    dm.cdsClientes.Filter := '';
+    dm.cdsClientes.CommandText := 'select * from Clientes where ID_CLIENTE = ' + IntToStr(dm.cdsPedidosID_CLIENTE.AsInteger) + ' order by id_cliente';
+    dm.cdsClientes.open;
+
     cxLblRazaosocial.Caption := dm.cdsClientesRAZAO_SOCIAL.AsString;
     cxLblEndereco.Caption := dm.cdsClientesENDERECO.AsString+','+
                              dm.cdsClientesNUMERO.AsString;
@@ -923,6 +990,8 @@ end;
 
 procedure TfrmPedidos.cxGridPedidosDBTableView1KeyDown(
   Sender: TObject; var Key: Word; Shift: TShiftState);
+var
+  cod, prod: string;
 begin
   if Key = VK_RETURN then
   begin
@@ -974,6 +1043,24 @@ begin
     cxLblFone.Caption := dm.cdsClientesTELEFONE.AsString;
     dm.cdsClientes.Filtered := False;
     dm.cdsClientes.Filter := '';
+    cod:= '';
+    prod:= '';
+
+    dm.cdsPedidos_Itens.first;
+    while not dm.cdsPedidos_Itens.eof do
+    begin
+       cod:= cod + Quotedstr(dm.cdsPedidos_ItensCODIGO.AsString) + ',';
+       prod:= prod + dm.cdsPedidos_ItensID_PRODUTO.AsString + ',';
+       dm.cdsPedidos_Itens.next;
+    end;
+
+
+    dm.cdsProdutos.close;
+    dm.cdsProdutos.CommandText := 'SELECT * FROM PRODUTOS WHERE PRO_CODIGO IN ('+ copy(cod,1, cod.Length-1) +')  '+
+    ' and COD_PROD IN ('+ copy(prod,1, prod.Length-1) +')  ';
+    dm.cdsProdutos.open;
+
+
   end;
 end;
 

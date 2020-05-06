@@ -22,7 +22,9 @@ uses
   cxNavigator, Data.DB, cxDBData, cxPCdxBarPopupMenu, cxPC, cxGridLevel,
   cxClasses, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
   cxGridDBTableView, cxGrid, Vcl.Menus, cxButtons, Vcl.Mask, Vcl.DBCtrls,
-  cxContainer, cxLabel, cxTextEdit, cxDBEdit, cxDBNavigator, Vcl.Samples.Gauges{, dxSkinMetropolis,
+  cxContainer, cxLabel, cxTextEdit, cxDBEdit, cxDBNavigator, Vcl.Samples.Gauges,
+  ACBrBase, ACBrSocket, ACBrCEP
+  {, dxSkinMetropolis,
   dxSkinMetropolisDark, dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray,
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxBarBuiltInMenu};
@@ -61,7 +63,7 @@ type
     cxDBTextEdit1: TcxDBTextEdit;
     cxDBTCNPJ: TcxDBTextEdit;
     cxDBTextEdit3: TcxDBTextEdit;
-    cxDBTextEdit4: TcxDBTextEdit;
+    cxDBCep: TcxDBTextEdit;
     cxDBTextEdit5: TcxDBTextEdit;
     cxDBTCPF: TcxDBTextEdit;
     cxDBTextEdit7: TcxDBTextEdit;
@@ -94,6 +96,12 @@ type
     edtClientes: TEdit;
     BtImportar: TcxButton;
     Gauge1: TGauge;
+    cxLabel19: TcxLabel;
+    cxDBTextEdit6: TcxDBTextEdit;
+    cxButton1: TcxButton;
+    cxButton3: TcxButton;
+    ACBrCEP1: TACBrCEP;
+    //ACBrCEP1: TACBrCEP;
     procedure BackToMainForm(Sender: TObject);
     procedure CloseButtonClick(Sender: TObject);
     procedure Action1Execute(Sender: TObject);
@@ -110,6 +118,9 @@ type
       AButtonIndex: Integer; var ADone: Boolean);
     procedure edtClientesChange(Sender: TObject);
     procedure BtImportarClick(Sender: TObject);
+    procedure cxButton3Click(Sender: TObject);
+    procedure ACBrCEP1BuscaEfetuada(Sender: TObject);
+    procedure cxButton1Click(Sender: TObject);
   private
     { Private declarations }
     procedure AppBarResize;
@@ -127,7 +138,7 @@ implementation
 {$R *.dfm}
 
 uses GroupedItems1, SplitItemDetail1, UDataModul, UntLookUpTransportadores,
-  UProceduresClient;
+  UProceduresClient, UCnpjCpf;
 
 const
   AppBarHeight = 75;
@@ -162,8 +173,20 @@ end;
 procedure TfrmClientes.BtImportarClick(Sender: TObject);
 var
   cli, id, cont: integer;
-  cad: string;
+  cad, filtro: string;
 begin
+  filtro:= 'I';
+  if not inputquery('Importar novos clientes ou atualizar todos','digite I para importar novos ou digite A para atualizar todos',filtro) then
+    abort;
+
+  filtro:= Uppercase(filtro);
+
+  if (filtro <> 'A') and (filtro <> 'I')  then
+  begin
+    MessageDlg('Não foi possível importar tabela de Clientes digite A ou I !', mtError,[mbYes],0);
+    exit;
+  end;
+
   Dm.cdsGenerico.Close;
   DM.cdsGenerico.CommandText :='SELECT MAX(Id_cliente)as cad FROM Clientes';
   DM.cdsGenerico.open;
@@ -187,12 +210,15 @@ begin
 
     Close;
     Clear;
-    Add(' select distinct c.cod_cad,nome,email,endereco,numero,complemento,ddd1,ddd2,');
-	  Add('        fone1,fone2, bairro,cidade,uf,cep,cpf,pais ');
+    Add(' select distinct c.cod_cad,c.nome,email,endereco,numero,complemento,ddd1,ddd2,');
+	  Add('        fone1,fone2, bairro,v.cidade,uf,V.cep,cpf,pais,ibge ');
     Add('   from cadastros c ');
-    Add('  right outer join pedidos p on (p.cod_cad = c.cod_cad) where c.cod_cad is not null');
-    Add('  and data_cad > ''2017-01-01'' ');
-    Add('  and c.cod_cad > ' + cad);
+    Add('  right outer join pedidos p on (p.cod_cad = c.cod_cad)');
+    Add('  left outer join view_sistema_pedidos_ibge v on v.cod_ped = p.cod_ped and v.cod_cesta = p.cod_cesta ');
+    Add('  where c.cod_cad is not null and data_cad > ''2018-01-01'' ');
+
+    if filtro = 'I' then
+      Add('  and c.cod_cad > ' + cad);
     Open;
   end;
   try
@@ -218,7 +244,8 @@ begin
                                       ' UF =:UF,'+
                                       ' CEP =:CEP,'+
                                       ' TELEFONE =:TELEFONE,'+
-                                      ' CELULAR =:CELULAR'+
+                                      ' CELULAR =:CELULAR,'+
+                                      ' CODMUNICIPIO =:CODMUNICIPIO '+
                                       ' WHERE ID_CLIENTE = '+Dm.FDQConsulta.FieldByName('cod_cad').AsString;
         DM.cdsGenerico.Params.ParambyName('RAZAO_SOCIAL').AsString:= Copy(Dm.FDQConsulta.FieldByName('nome').AsString,1,255);
         DM.cdsGenerico.Params.ParambyName('FANTASIA').AsString:= Copy(Dm.FDQConsulta.FieldByName('nome').AsString,1,255);
@@ -232,35 +259,36 @@ begin
         DM.cdsGenerico.Params.ParambyName('CEP').AsString:= Copy(Dm.FDQConsulta.FieldByName('Cep').AsString,1,10);
         DM.cdsGenerico.Params.ParambyName('TELEFONE').AsString:= Copy(Dm.FDQConsulta.FieldByName('ddd1').AsString +Dm.FDQConsulta.FieldByName('fone1').AsString,1,100);
         DM.cdsGenerico.Params.ParambyName('CELULAR').AsString:= Copy(Dm.FDQConsulta.FieldByName('ddd2').AsString +Dm.FDQConsulta.FieldByName('fone2').AsString,1,50);
+        DM.cdsGenerico.Params.ParambyName('CODMUNICIPIO').AsINTEGER:= Dm.FDQConsulta.FieldByName('ibge').AsINTEGER;
         DM.cdsGenerico.Execute;
 
-        Dm.FDQCliente.Close;
-        Dm.FDQCliente.SQL.clear;
-        Dm.FDQCliente.SQL.text:= '  UPDATE PESSOA SET PESSOA = :PESSOA, RAZAO = :RAZAO,FANTASIA = :FANTASIA,'+
-                                 ' CNPJCPF = :CNPJCPF, CEP = :CEP, ENDERECO = :ENDERECO, BAIRRO = :BAIRRO, EMAIL = :EMAIL,'+
-                                 '    FONE = :FONE, CELULAR =:CELULAR'+
-                             ' WHERE ID = '+Dm.FDQConsulta.FieldByName('cod_cad').AsString;
-
-        Dm.FDQCliente.ParambyName('PESSOA').ASSTRING:=  'F';
-        Dm.FDQCliente.ParambyName('RAZAO').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('nome').AsString,1,255);
-        Dm.FDQCliente.ParambyName('FANTASIA').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('nome').AsString,1,255);;
-        Dm.FDQCliente.ParambyName('CNPJCPF').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('cpf').AsString,1,20);
-        Dm.FDQCliente.ParambyName('CEP').ASSTRING:=  Copy(Dm.FDQConsulta.FieldByName('Cep').AsString,1,10);
-        Dm.FDQCliente.ParambyName('ENDERECO').ASSTRING:=  Copy(Dm.FDQConsulta.FieldByName('endereco').AsString,1,200);
-        Dm.FDQCliente.ParambyName('BAIRRO').ASSTRING:=  Copy(Dm.FDQConsulta.FieldByName('bairro').AsString,1,200);
-        Dm.FDQCliente.ParambyName('EMAIL').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('email').AsString,1,100);;
-        Dm.FDQCliente.ParambyName('FONE').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('ddd1').AsString +Dm.FDQConsulta.FieldByName('fone1').AsString,1,20);
-        Dm.FDQCliente.ParambyName('CELULAR').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('ddd2').AsString +Dm.FDQConsulta.FieldByName('fone2').AsString,1,20);
-        Dm.FDQCliente.ExecSQL;
+//        Dm.FDQCliente.Close;
+//        Dm.FDQCliente.SQL.clear;
+//        Dm.FDQCliente.SQL.text:= '  UPDATE PESSOA SET PESSOA = :PESSOA, RAZAO = :RAZAO,FANTASIA = :FANTASIA,'+
+//                                 ' CNPJCPF = :CNPJCPF, CEP = :CEP, ENDERECO = :ENDERECO, BAIRRO = :BAIRRO, EMAIL = :EMAIL,'+
+//                                 '    FONE = :FONE, CELULAR =:CELULAR'+
+//                             ' WHERE ID = '+Dm.FDQConsulta.FieldByName('cod_cad').AsString;
+//
+//        Dm.FDQCliente.ParambyName('PESSOA').ASSTRING:=  'F';
+//        Dm.FDQCliente.ParambyName('RAZAO').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('nome').AsString,1,255);
+//        Dm.FDQCliente.ParambyName('FANTASIA').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('nome').AsString,1,255);;
+//        Dm.FDQCliente.ParambyName('CNPJCPF').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('cpf').AsString,1,20);
+//        Dm.FDQCliente.ParambyName('CEP').ASSTRING:=  Copy(Dm.FDQConsulta.FieldByName('Cep').AsString,1,10);
+//        Dm.FDQCliente.ParambyName('ENDERECO').ASSTRING:=  Copy(Dm.FDQConsulta.FieldByName('endereco').AsString,1,200);
+//        Dm.FDQCliente.ParambyName('BAIRRO').ASSTRING:=  Copy(Dm.FDQConsulta.FieldByName('bairro').AsString,1,200);
+//        Dm.FDQCliente.ParambyName('EMAIL').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('email').AsString,1,100);;
+//        Dm.FDQCliente.ParambyName('FONE').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('ddd1').AsString +Dm.FDQConsulta.FieldByName('fone1').AsString,1,20);
+//        Dm.FDQCliente.ParambyName('CELULAR').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('ddd2').AsString +Dm.FDQConsulta.FieldByName('fone2').AsString,1,20);
+//        Dm.FDQCliente.ExecSQL;
       end
       else
       begin
         Dm.cdsGenerico.Close;
         DM.cdsGenerico.CommandText := ' INSERT INTO CLIENTES '+
         '            (ID_CLIENTE,RAZAO_SOCIAL,FANTASIA,CPF,EMAIL,ENDERECO,NUMERO,'+
-        '             BAIRRO, CIDADE, UF, CEP, TELEFONE, CELULAR)'+
+        '             BAIRRO, CIDADE, UF, CEP, TELEFONE, CELULAR, CODMUNICIPIO )'+
         '  VALUES (:ID_CLIENTE,:RAZAO_SOCIAL,:FANTASIA,:CPF,:EMAIL,:ENDERECO,:NUMERO,'+
-        '          :BAIRRO,:CIDADE,:UF,:CEP,:TELEFONE,:CELULAR)';
+        '          :BAIRRO,:CIDADE,:UF,:CEP,:TELEFONE,:CELULAR, :CODMUNICIPIO )';
         DM.cdsGenerico.Params.ParambyName('ID_CLIENTE').AsInteger:= Dm.FDQConsulta.FieldByName('cod_cad').Asinteger;
         DM.cdsGenerico.Params.ParambyName('RAZAO_SOCIAL').AsString:= Copy(Dm.FDQConsulta.FieldByName('nome').AsString,1,255);
         DM.cdsGenerico.Params.ParambyName('FANTASIA').AsString:= Copy(Dm.FDQConsulta.FieldByName('nome').AsString,1,255);
@@ -274,42 +302,43 @@ begin
         DM.cdsGenerico.Params.ParambyName('CEP').AsString:= Copy(Dm.FDQConsulta.FieldByName('Cep').AsString,1,10);
         DM.cdsGenerico.Params.ParambyName('TELEFONE').AsString:= Copy(Dm.FDQConsulta.FieldByName('ddd1').AsString +Dm.FDQConsulta.FieldByName('fone1').AsString,1,100);
         DM.cdsGenerico.Params.ParambyName('CELULAR').AsString:= Copy(Dm.FDQConsulta.FieldByName('ddd2').AsString +Dm.FDQConsulta.FieldByName('fone2').AsString,1,50);
+        DM.cdsGenerico.Params.ParambyName('CODMUNICIPIO').AsINTEGER:= Dm.FDQConsulta.FieldByName('ibge').AsINTEGER;
         DM.cdsGenerico.Execute;
 
-        Dm.FDQCliente.Close;
-        Dm.FDQCliente.SQL.clear;
-        Dm.FDQCliente.SQL.text:= 'SELECT coalesce(MAX(ID),0)+ 1 AS ID FROM PESSOA';
-        Dm.FDQCliente.Open;
+//        Dm.FDQCliente.Close;
+//        Dm.FDQCliente.SQL.clear;
+//        Dm.FDQCliente.SQL.text:= 'SELECT coalesce(MAX(ID),0)+ 1 AS ID FROM PESSOA';
+//        Dm.FDQCliente.Open;
+//
+//        id:= Dm.FDQCliente.FieldByName('ID').ASINTEGER;
+//
+//        Dm.FDQCliente.Close;
+//        Dm.FDQCliente.SQL.clear;
+//        Dm.FDQCliente.SQL.text:= 'SELECT count(ID) cont FROM PESSOA WHERE ID = '+Dm.FDQConsulta.FieldByName('cod_cad').AsString;
+//        Dm.FDQCliente.Open;
+//
+//        cont:= Dm.FDQCliente.FieldByName('cont').ASINTEGER;
 
-        id:= Dm.FDQCliente.FieldByName('ID').ASINTEGER;
-
-        Dm.FDQCliente.Close;
-        Dm.FDQCliente.SQL.clear;
-        Dm.FDQCliente.SQL.text:= 'SELECT count(ID) cont FROM PESSOA WHERE ID = '+Dm.FDQConsulta.FieldByName('cod_cad').AsString;
-        Dm.FDQCliente.Open;
-
-        cont:= Dm.FDQCliente.FieldByName('cont').ASINTEGER;
-
-        if cont <= 0 then
-        begin
-          Dm.FDQCliente.Close;
-          Dm.FDQCliente.SQL.clear;
-          Dm.FDQCliente.SQL.text:= ' INSERT INTO PESSOA(ID,PESSOA,RAZAO,FANTASIA,CNPJCPF,IE,CEP,ENDERECO,BAIRRO,EMAIL,FONE,CELULAR) '+
-                                   ' VALUES (:ID,:PESSOA,:RAZAO,:FANTASIA,:CNPJCPF,:IE,:CEP,:ENDERECO,:BAIRRO,:EMAIL,:FONE,:CELULAR)';
-          Dm.FDQCliente.ParambyName('ID').ASINTEGER:= Dm.FDQConsulta.FieldByName('cod_cad').ASINTEGER;
-          Dm.FDQCliente.ParambyName('PESSOA').ASSTRING:=  'F';
-          Dm.FDQCliente.ParambyName('RAZAO').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('nome').AsString,1,255);
-          Dm.FDQCliente.ParambyName('FANTASIA').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('nome').AsString,1,255);;
-          Dm.FDQCliente.ParambyName('CNPJCPF').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('cpf').AsString,1,20);
-          Dm.FDQCliente.ParambyName('IE').ASSTRING:= '';
-          Dm.FDQCliente.ParambyName('CEP').ASSTRING:=  Copy(Dm.FDQConsulta.FieldByName('Cep').AsString,1,10);
-          Dm.FDQCliente.ParambyName('ENDERECO').ASSTRING:=  Copy(Dm.FDQConsulta.FieldByName('endereco').AsString,1,200);
-          Dm.FDQCliente.ParambyName('BAIRRO').ASSTRING:=  Copy(Dm.FDQConsulta.FieldByName('bairro').AsString,1,200);
-          Dm.FDQCliente.ParambyName('EMAIL').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('email').AsString,1,100);;
-          Dm.FDQCliente.ParambyName('FONE').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('ddd1').AsString +Dm.FDQConsulta.FieldByName('fone1').AsString,1,20);
-          Dm.FDQCliente.ParambyName('CELULAR').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('ddd2').AsString +Dm.FDQConsulta.FieldByName('fone2').AsString,1,20);
-          Dm.FDQCliente.ExecSQL;
-        end;
+//        if cont <= 0 then
+//        begin
+//          Dm.FDQCliente.Close;
+//          Dm.FDQCliente.SQL.clear;
+//          Dm.FDQCliente.SQL.text:= ' INSERT INTO PESSOA(ID,PESSOA,RAZAO,FANTASIA,CNPJCPF,IE,CEP,ENDERECO,BAIRRO,EMAIL,FONE,CELULAR) '+
+//                                   ' VALUES (:ID,:PESSOA,:RAZAO,:FANTASIA,:CNPJCPF,:IE,:CEP,:ENDERECO,:BAIRRO,:EMAIL,:FONE,:CELULAR)';
+//          Dm.FDQCliente.ParambyName('ID').ASINTEGER:= Dm.FDQConsulta.FieldByName('cod_cad').ASINTEGER;
+//          Dm.FDQCliente.ParambyName('PESSOA').ASSTRING:=  'F';
+//          Dm.FDQCliente.ParambyName('RAZAO').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('nome').AsString,1,255);
+//          Dm.FDQCliente.ParambyName('FANTASIA').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('nome').AsString,1,255);;
+//          Dm.FDQCliente.ParambyName('CNPJCPF').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('cpf').AsString,1,20);
+//          Dm.FDQCliente.ParambyName('IE').ASSTRING:= '';
+//          Dm.FDQCliente.ParambyName('CEP').ASSTRING:=  Copy(Dm.FDQConsulta.FieldByName('Cep').AsString,1,10);
+//          Dm.FDQCliente.ParambyName('ENDERECO').ASSTRING:=  Copy(Dm.FDQConsulta.FieldByName('endereco').AsString,1,200);
+//          Dm.FDQCliente.ParambyName('BAIRRO').ASSTRING:=  Copy(Dm.FDQConsulta.FieldByName('bairro').AsString,1,200);
+//          Dm.FDQCliente.ParambyName('EMAIL').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('email').AsString,1,100);;
+//          Dm.FDQCliente.ParambyName('FONE').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('ddd1').AsString +Dm.FDQConsulta.FieldByName('fone1').AsString,1,20);
+//          Dm.FDQCliente.ParambyName('CELULAR').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('ddd2').AsString +Dm.FDQConsulta.FieldByName('fone2').AsString,1,20);
+//          Dm.FDQCliente.ExecSQL;
+//        end;
 
       end;
       inc(cli);
@@ -324,6 +353,30 @@ begin
   DM.cdsClientes.open;
   Gauge1.visible:= false;
   MessageDlg('Foram importados ' +inttostr(cli)+ ' Clientes!', mtInformation,[mbYes],0);
+end;
+
+procedure TfrmClientes.ACBrCEP1BuscaEfetuada(Sender: TObject);
+var I : integer;
+begin
+  For I := 0 to ACBrCEP1.Enderecos.Count-1 do
+  begin
+    with ACBrCEP1.Enderecos[I] do
+    begin
+      cxDBCep.Text:= CEP;
+      cxDBTextEdit8.Text:= Tipo_Logradouro+ ' ' +Logradouro;
+      //:= Complemento ;
+      cxDBTextEdit5.Text:= Bairro;
+      cxDBTextEdit2.Text:= Municipio;
+      cxDBTextEdit6.Text:= IBGE_Municipio;
+      cxDBTextEdit15.Text:= UF;
+      DM.cdsClientesENDERECO.AsString:= Tipo_Logradouro+ ' ' +Logradouro;
+      DM.cdsClientesBairro.AsString:= Bairro;
+      DM.cdsClientesCidade.AsString:= Municipio;
+      DM.cdsClientesCODMUNICIPIO.AsString  := IBGE_Municipio;
+      DM.cdsClientesUF.AsString:= UF;
+      DM.cdsClientesCEP.Asstring := CEP;
+    end;
+  end;
 end;
 
 procedure TfrmClientes.Action1Execute(Sender: TObject);
@@ -352,9 +405,69 @@ begin
   end;
 end;
 
+procedure TfrmClientes.cxButton1Click(Sender: TObject);
+begin
+  if not Assigned(FrmCNPJCPF) then
+    FrmCNPJCPF := TFrmCNPJCPF.Create(Self);
+    FrmCNPJCPF.ShowModal;
+    cxDBTextEdit13.text:= FrmCNPJCPF.RazaoSocial;
+    cxDBTextEdit14.text:= FrmCNPJCPF.Fantasia;
+    cxDBTextEdit8.text:= FrmCNPJCPF.Endereco;
+    cxDBTextEdit1.text:= FrmCNPJCPF.Numero;
+
+    cxDBTextEdit5.text:= FrmCNPJCPF.Bairro;
+    cxDBTextEdit2.text:= FrmCNPJCPF.Cidade;
+    cxDBTextEdit15.text:= FrmCNPJCPF.UF;
+    cxDBCep.text:= FrmCNPJCPF.CEP;
+    cxDBTextEdit9.text:= FrmCNPJCPF.Email;
+    cxDBTextEdit11.text:= FrmCNPJCPF.Telefone;
+
+  FreeAndNil(FrmCNPJCPF);
+end;
+
+procedure TfrmClientes.cxButton3Click(Sender: TObject);
+var
+  cep: string;
+begin
+  if DM.cdsClientes.State in [dsEdit,dsInsert] then
+  begin
+    ACBrCEP1.WebService := TACBrCEPWebService( 10 ) ;
+    ACBrCEP1.ChaveAcesso := '1STa9eKhhfKvc7Ljh6W6CO5Kr/bFOl.';
+
+    cep:= Trim(RetirarPontosETracos(cxDBCep.Text));
+
+    if cep = '' then
+      cep:= Trim(RetirarPontosETracos(InputBox('Busca Cep','Informe a cep','')));
+
+    if cep <> '' then
+    begin
+      try
+        ACBrCEP1.BuscarPorCEP(cep);
+      except
+        On E : Exception do
+        begin
+          showmessage('Valor digitado é inválido'+#13+E.Message);
+          abort;
+        end;
+      end;
+    end;
+  end;
+
+end;
+
 procedure TfrmClientes.cxDBNavigator1ButtonsButtonClick(Sender: TObject;
   AButtonIndex: Integer; var ADone: Boolean);
 begin
+  if AButtonIndex in [6,9] then
+  begin
+    cxButton1.Enabled:= true;
+    cxButton3.Enabled:= true;
+  end
+  else
+  begin
+    cxButton1.Enabled:= false;
+    cxButton3.Enabled:= false;
+  end;
   if AButtonIndex = 10 then
   begin
     Self.SetFocus;

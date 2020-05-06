@@ -19,7 +19,7 @@ object frmPrincipal: TfrmPrincipal
     Top = 41
     Width = 1106
     Height = 543
-    ActivePage = tsConfiguracoes
+    ActivePage = TSUsuarios
     Align = alClient
     TabOrder = 0
     object tsConfiguracoes: TTabSheet
@@ -209,10 +209,6 @@ object frmPrincipal: TfrmPrincipal
     object TSChat: TTabSheet
       Caption = 'Chat'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object lblUsuariosConectadosChat: TLabel
         Left = 0
         Top = 360
@@ -233,10 +229,6 @@ object frmPrincipal: TfrmPrincipal
     object TSVendas: TTabSheet
       Caption = 'Configura'#231#245'es vendas'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox5: TGroupBox
         Left = 0
         Top = 0
@@ -331,10 +323,6 @@ object frmPrincipal: TfrmPrincipal
     object TSUsuarios: TTabSheet
       Caption = 'Usu'#225'rios'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GBUsuarios: TGroupBox
         Left = 0
         Top = 0
@@ -349,6 +337,7 @@ object frmPrincipal: TfrmPrincipal
           Width = 452
           Height = 197
           Align = alClient
+          DataSource = DSModuleDb.DSUsuarios
           TabOrder = 0
           TitleFont.Charset = DEFAULT_CHARSET
           TitleFont.Color = clWindowText
@@ -386,6 +375,7 @@ object frmPrincipal: TfrmPrincipal
             Top = -1
             Width = 240
             Height = 25
+            DataSource = DSModuleDb.DSUsuarios
             TabOrder = 0
           end
         end
@@ -419,6 +409,7 @@ object frmPrincipal: TfrmPrincipal
             Top = 0
             Width = 222
             Height = 25
+            DataSource = DSModuleDb.dsPermissoesUsuariossistema
             VisibleButtons = [nbFirst, nbPrior, nbNext, nbLast, nbDelete, nbRefresh]
             TabOrder = 0
           end
@@ -429,6 +420,7 @@ object frmPrincipal: TfrmPrincipal
           Width = 629
           Height = 192
           Align = alClient
+          DataSource = DSModuleDb.dsPermissoesUsuariossistema
           TabOrder = 1
           TitleFont.Charset = DEFAULT_CHARSET
           TitleFont.Color = clWindowText
@@ -503,6 +495,7 @@ object frmPrincipal: TfrmPrincipal
           Width = 1094
           Height = 228
           Align = alClient
+          DataSource = DSModuleDb.DSPermissoesVsUsuarios
           TabOrder = 1
           TitleFont.Charset = DEFAULT_CHARSET
           TitleFont.Color = clWindowText
@@ -545,7 +538,7 @@ object frmPrincipal: TfrmPrincipal
     Left = 100
     Top = 470
     Bitmap = {
-      494C0101020008003C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010102000800400010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000EDEDED00B5BDB500839B83006B976B006A986A0087A08700B7C0B700EDED

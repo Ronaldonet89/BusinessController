@@ -102,6 +102,7 @@ begin
   DSServer1.Stop;
   DSTCPServerTransport1.Port := StrToInt(pPorta);
   DSServer1.Start;
+
   ServerSocket1.Active := True;
   Application.CreateForm(TDSModuleDb,DSModuleDb);
   DSModuleDb.SQLConexao.Connected := False;

@@ -2,8 +2,8 @@ object frmVendasBalcao: TfrmVendasBalcao
   Left = 113
   Top = 64
   BorderStyle = bsNone
-  ClientHeight = 673
-  ClientWidth = 1148
+  ClientHeight = 644
+  ClientWidth = 1236
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -17,8 +17,8 @@ object frmVendasBalcao: TfrmVendasBalcao
   OnKeyDown = FormKeyDown
   OnShow = FormShow
   DesignSize = (
-    1148
-    673)
+    1236
+    644)
   PixelsPerInch = 96
   TextHeight = 13
   object SPBIniciarVenda: TSpeedButton
@@ -177,7 +177,7 @@ object frmVendasBalcao: TfrmVendasBalcao
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 1148
+    Width = 1236
     Height = 67
     Align = alTop
     ParentColor = True
@@ -316,7 +316,7 @@ object frmVendasBalcao: TfrmVendasBalcao
       ParentFont = False
     end
     object lbl9: TLabel
-      Left = 1079
+      Left = 1167
       Top = 1
       Width = 68
       Height = 65
@@ -369,7 +369,7 @@ object frmVendasBalcao: TfrmVendasBalcao
     object spbEfetuarPagamentoCliente: TcxButton
       Left = 374
       Top = 31
-      Width = 153
+      Width = 154
       Height = 25
       Caption = 'Efetuar Pagamento Cliente'
       LookAndFeel.NativeStyle = False
@@ -378,35 +378,47 @@ object frmVendasBalcao: TfrmVendasBalcao
       OnClick = spbEfetuarPagamentoClienteClick
     end
     object btnTestarImpressao: TcxButton
-      Left = 544
-      Top = 16
+      Left = 1033
+      Top = 22
       Width = 105
       Height = 25
       Caption = 'Teste Impress'#227'o'
+      Enabled = False
       TabOrder = 5
+      Visible = False
       OnClick = btnTestarImpressaoClick
     end
     object cxExtrato: TcxButton
       Left = 374
       Top = 4
-      Width = 153
+      Width = 154
       Height = 25
       Caption = '2'#170' Via do Extrato'
       LookAndFeel.NativeStyle = False
       TabOrder = 6
       OnClick = cxExtratoClick
     end
+    object cxButton1: TcxButton
+      Left = 534
+      Top = 4
+      Width = 96
+      Height = 25
+      Caption = 'Movimenta'#231#227'o'
+      LookAndFeel.NativeStyle = False
+      TabOrder = 7
+      OnClick = cxButton1Click
+    end
   end
   object Panel2: TPanel
     Left = 9
     Top = 419
-    Width = 1130
-    Height = 254
+    Width = 1218
+    Height = 225
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     DesignSize = (
-      1130
-      254)
+      1218
+      225)
     object Label1: TLabel
       Left = 1
       Top = 7
@@ -470,8 +482,8 @@ object frmVendasBalcao: TfrmVendasBalcao
     end
     object Label10: TLabel
       Left = 1
-      Top = 238
-      Width = 1128
+      Top = 209
+      Width = 1216
       Height = 15
       Align = alBottom
       Caption = 
@@ -489,31 +501,32 @@ object frmVendasBalcao: TfrmVendasBalcao
     object Image1: TImage
       Left = 774
       Top = 3
-      Width = 356
+      Width = 444
       Height = 223
       Anchors = [akLeft, akTop, akRight]
       Stretch = True
+      ExplicitWidth = 356
     end
     object pnl1: TPanel
-      Left = 0
+      Left = 3
       Top = 0
-      Width = 1130
-      Height = 254
+      Width = 1218
+      Height = 225
       Anchors = [akLeft, akTop, akRight, akBottom]
       ParentColor = True
       TabOrder = 0
       DesignSize = (
-        1130
-        254)
+        1218
+        225)
       object lbl1: TLabel
-        Left = 1
+        Left = -2
         Top = 7
         Width = 88
         Height = 13
         Caption = #193'rea de pesquisa'
       end
       object lbl2: TLabel
-        Left = 264
+        Left = 261
         Top = 7
         Width = 111
         Height = 13
@@ -576,11 +589,12 @@ object frmVendasBalcao: TfrmVendasBalcao
       object img1: TImage
         Left = 781
         Top = 3
-        Width = 356
+        Width = 444
         Height = 223
         Anchors = [akLeft, akTop, akRight]
         Stretch = True
         Visible = False
+        ExplicitWidth = 356
       end
       object Label9: TLabel
         Left = 263
@@ -619,6 +633,7 @@ object frmVendasBalcao: TfrmVendasBalcao
         Font.Height = -21
         Font.Name = 'Tahoma'
         Font.Style = [fsBold]
+        NumbersOnly = True
         ParentCtl3D = False
         ParentFont = False
         TabOrder = 2
@@ -637,6 +652,7 @@ object frmVendasBalcao: TfrmVendasBalcao
         Font.Height = -21
         Font.Name = 'Tahoma'
         Font.Style = [fsBold]
+        NumbersOnly = True
         ParentCtl3D = False
         ParentFont = False
         TabOrder = 3
@@ -655,6 +671,7 @@ object frmVendasBalcao: TfrmVendasBalcao
         Font.Height = -21
         Font.Name = 'Tahoma'
         Font.Style = [fsBold]
+        NumbersOnly = True
         ParentCtl3D = False
         ParentFont = False
         ReadOnly = True
@@ -674,6 +691,7 @@ object frmVendasBalcao: TfrmVendasBalcao
         Font.Height = -21
         Font.Name = 'Tahoma'
         Font.Style = [fsBold]
+        NumbersOnly = True
         ParentCtl3D = False
         ParentFont = False
         ReadOnly = True
@@ -711,6 +729,7 @@ object frmVendasBalcao: TfrmVendasBalcao
         Font.Height = -21
         Font.Name = 'Tahoma'
         Font.Style = [fsBold]
+        NumbersOnly = True
         ParentCtl3D = False
         ParentFont = False
         TabOrder = 4
@@ -719,9 +738,34 @@ object frmVendasBalcao: TfrmVendasBalcao
       end
     end
   end
+  object mVendaEnviar: TcxMemo
+    Left = 7
+    Top = 66
+    Anchors = [akLeft, akTop, akRight]
+    ParentFont = False
+    Properties.ScrollBars = ssVertical
+    Properties.OnChange = cxMemo1PropertiesChange
+    Style.BorderColor = clWindowFrame
+    Style.BorderStyle = ebs3D
+    Style.Color = clCream
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -16
+    Style.Font.Name = 'Tahoma'
+    Style.Font.Style = [fsBold]
+    Style.HotTrack = False
+    Style.LookAndFeel.NativeStyle = False
+    Style.IsFontAssigned = True
+    StyleDisabled.LookAndFeel.NativeStyle = False
+    StyleFocused.LookAndFeel.NativeStyle = False
+    StyleHot.LookAndFeel.NativeStyle = False
+    TabOrder = 3
+    Height = 354
+    Width = 1219
+  end
   object cxMemo1: TcxMemo
     Left = 9
-    Top = 66
+    Top = 62
     Anchors = [akLeft, akTop, akRight]
     ParentFont = False
     Properties.ScrollBars = ssVertical
@@ -742,7 +786,7 @@ object frmVendasBalcao: TfrmVendasBalcao
     StyleHot.LookAndFeel.NativeStyle = False
     TabOrder = 1
     Height = 354
-    Width = 1131
+    Width = 1219
   end
   object VDOCaPrinter1: TVDOCaPrinter
     ShowDialog = False
@@ -765,15 +809,40 @@ object frmVendasBalcao: TfrmVendasBalcao
     Left = 1088
     Top = 480
   end
+  object ACBrSATExtratoESCPOS1: TACBrSATExtratoESCPOS
+    Sistema = 'Projeto ACBr - www.projetoacbr.com.br'
+    Site = 'http://www.projetoacbr.com.br'
+    MargemInferior = 0.800000000000000000
+    MargemSuperior = 0.800000000000000000
+    MargemEsquerda = 0.600000000000000000
+    MargemDireita = 0.510000000000000000
+    ExpandeLogoMarcaConfig.Altura = 0
+    ExpandeLogoMarcaConfig.Esquerda = 0
+    ExpandeLogoMarcaConfig.Topo = 0
+    ExpandeLogoMarcaConfig.Largura = 0
+    ExpandeLogoMarcaConfig.Dimensionar = False
+    ExpandeLogoMarcaConfig.Esticar = True
+    CasasDecimais.Formato = tdetInteger
+    CasasDecimais.qCom = 2
+    CasasDecimais.vUnCom = 2
+    CasasDecimais.MaskqCom = ',0.00'
+    CasasDecimais.MaskvUnCom = ',0.00'
+    MsgAppQRCode = 
+      'Consulte o QR Code pelo aplicativo  "De olho na nota", dispon'#237've' +
+      'l na AppStore (Apple) e PlayStore (Android)'
+    FormularioContinuo = True
+    PosPrinter = ACBrPosPrinter1
+    Left = 945
+    Top = 291
+  end
   object ACBrECF1: TACBrECF
     QuebraLinhaRodape = False
-    Modelo = ecfBematech
-    Porta = 'COM2'
+    Porta = 'COM1'
     MsgAguarde = 'Aguardando a resposta da Impressora: %d segundos'
     MsgTrabalhando = 'Impressora est'#225' trabalhando'
     MsgRelatorio = 'Imprimindo %s  %d'#170' Via '
     MsgPausaRelatorio = 'Destaque a %d'#170' via, <ENTER> proxima, %d seg.'
-    PaginaDeCodigo = 850
+    PaginaDeCodigo = 0
     MemoParams.Strings = (
       '[Cabecalho]'
       'LIN000=<center><b>Nome da Empresa</b></center>'
@@ -810,15 +879,13 @@ object frmVendasBalcao: TfrmVendasBalcao
       'HTML=1'
       'HTML_Title_Size=2'
       'HTML_Font=<font size="2" face="Lucida Console">')
-    Device.HandShake = hsRTS_CTS
-    Device.HardFlow = True
     ConfigBarras.MostrarCodigo = True
     ConfigBarras.LarguraLinha = 0
     ConfigBarras.Altura = 0
     ConfigBarras.Margem = 0
     InfoRodapeCupom.Imposto.ModoCompacto = False
-    Left = 873
-    Top = 467
+    Left = 729
+    Top = 291
   end
   object ACBrPosPrinter1: TACBrPosPrinter
     Modelo = ppEscPosEpson
@@ -830,34 +897,52 @@ object frmVendasBalcao: TfrmVendasBalcao
     ConfigQRCode.LarguraModulo = 4
     ConfigQRCode.ErrorLevel = 0
     LinhasEntreCupons = 0
-    ControlePorta = True
-    Left = 777
-    Top = 523
+    Left = 793
+    Top = 283
   end
-  object ACBrSATExtratoESCPOS1: TACBrSATExtratoESCPOS
+  object RLPDFFilter1: TRLPDFFilter
+    DocumentInfo.Creator = 
+      'FortesReport Community Edition v4.0 \251 Copyright '#169' 1999-2016 F' +
+      'ortes Inform'#225'tica'
+    DisplayName = 'Documento PDF'
+    Left = 672
+    Top = 240
+  end
+  object ACBrSATExtratoFortes1: TACBrSATExtratoFortes
+    Sistema = 'Projeto ACBr - www.projetoacbr.com.br'
+    MargemInferior = 4.000000000000000000
+    MargemSuperior = 2.000000000000000000
+    MargemEsquerda = 2.000000000000000000
+    MargemDireita = 2.000000000000000000
+    ExpandeLogoMarcaConfig.Altura = 0
+    ExpandeLogoMarcaConfig.Esquerda = 0
+    ExpandeLogoMarcaConfig.Topo = 0
+    ExpandeLogoMarcaConfig.Largura = 0
+    ExpandeLogoMarcaConfig.Dimensionar = False
+    ExpandeLogoMarcaConfig.Esticar = True
+    CasasDecimais.Formato = tdetInteger
+    CasasDecimais.qCom = 2
+    CasasDecimais.vUnCom = 2
+    CasasDecimais.MaskqCom = ',0.00'
+    CasasDecimais.MaskvUnCom = ',0.00'
     ACBrSAT = ACBrSAT1
-    Mask_qCom = '0.0000'
-    Mask_vUnCom = '0.000'
-    SoftwareHouse = 'Business Controller Desenvolvimento de software'
-    Site = 'http://www.projetoacbr.com.br'
     MsgAppQRCode = 
       'Consulte o QR Code pelo aplicativo  "De olho na nota", dispon'#237've' +
       'l na AppStore (Apple) e PlayStore (Android)'
-    PosPrinter = ACBrPosPrinter1
-    Left = 769
-    Top = 459
+    FormularioContinuo = True
+    Left = 640
+    Top = 352
   end
   object ACBrSAT1: TACBrSAT
-    Modelo = satDinamico_stdcall
-    Extrato = ACBrSATExtratoESCPOS1
+    Extrato = ACBrSATExtratoFortes1
     Config.infCFe_versaoDadosEnt = 0.070000000000000010
     Config.ide_numeroCaixa = 0
     Config.ide_tpAmb = taHomologacao
     Config.emit_cRegTrib = RTSimplesNacional
     Config.emit_cRegTribISSQN = RTISSMicroempresaMunicipal
     Config.emit_indRatISSQN = irSim
-    Config.EhUTF8 = True
-    Config.PaginaDeCodigo = 65001
+    Config.EhUTF8 = False
+    Config.PaginaDeCodigo = 0
     Config.XmlSignLib = xsNone
     ConfigArquivos.PrefixoArqCFe = 'AD'
     ConfigArquivos.PrefixoArqCFeCanc = 'ADC'
@@ -866,9 +951,7 @@ object frmVendasBalcao: TfrmVendasBalcao
     Rede.tipoLan = lanDHCP
     Rede.proxy = 0
     Rede.proxy_porta = 0
-    OnGetcodigoDeAtivacao = ACBrSAT1GetcodigoDeAtivacao
-    OnGetsignAC = ACBrSAT1GetsignAC
-    Left = 936
-    Top = 472
+    Left = 752
+    Top = 376
   end
 end

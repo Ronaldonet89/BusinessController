@@ -471,13 +471,16 @@ object frmPagar: TfrmPagar
     Properties.ActivePage = cxTSPrincipal
     Properties.CustomButtons.Buttons = <>
     LookAndFeel.NativeStyle = False
-    ClientRectBottom = 239
-    ClientRectLeft = 4
-    ClientRectRight = 924
-    ClientRectTop = 27
+    ClientRectBottom = 243
+    ClientRectRight = 928
+    ClientRectTop = 24
     object cxTSPrincipal: TcxTabSheet
       Caption = 'Principal'
       ImageIndex = 0
+      ExplicitLeft = 4
+      ExplicitTop = 27
+      ExplicitWidth = 920
+      ExplicitHeight = 212
       object DBEdit1: TDBEdit
         Left = 16
         Top = 24
@@ -691,7 +694,7 @@ object frmPagar: TfrmPagar
     object Label9: TLabel
       Left = 96
       Top = -15
-      Width = 135
+      Width = 132
       Height = 74
       Caption = 'Pagar'
       Font.Charset = DEFAULT_CHARSET

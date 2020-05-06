@@ -14,17 +14,19 @@ uses
   dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinPumpkin, dxSkinSeven,
   dxSkinSharp, dxSkinSilver, dxSkinSpringTime, dxSkinStardust, dxSkinSummer2008,
   dxSkinsDefaultPainters, dxSkinValentine, dxSkinXmas2008Blue, Vcl.Buttons,
-  Vcl.StdCtrls, cxTextEdit, cxMemo, Vcl.ExtCtrls, ACBrECFClass, ACBrBase,
-  ACBrECF,datasnap.dbclient, VDODmPrinter, VDOBasePrinter, VDOPrinter,
+  Vcl.StdCtrls, cxTextEdit, cxMemo, Vcl.ExtCtrls,
+  ACBrBase, datasnap.dbclient, VDODmPrinter, VDOBasePrinter, VDOPrinter,
   VDOCaPrinter, ACBrNFe, ACBrNFeDANFEClass, ACBrNFeDANFEFR, dxSkinBlueprint,
   dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinHighContrast,
   dxSkinOffice2013White, dxSkinSevenClassic, dxSkinSharpPlus,
   dxSkinTheAsphaltWorld, dxSkinVS2010, dxSkinWhiteprint, Vcl.Menus, cxButtons,
-  cxGroupBox, cxLabel, Vcl.Imaging.pngimage, ACBrSAT,ACBrSATClass, ACBrSATExtratoClass,
-  ACBrSATExtratoESCPOS, ACBrPosPrinter,pcnConversao,AcbrUtil,{ dxSkinMetropolis,
-  dxSkinMetropolisDark, dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray,
-  dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue,
-  dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light,}UITypes;
+  cxGroupBox, cxLabel, Vcl.Imaging.pngimage,UITypes,ACBrDFeSSL,ACBrECFClass,
+  ACBrECF, ACBrSATExtratoClass, ACBrSATExtratoESCPOS, ACBrECFVirtual,
+  ACBrECFVirtualBuffer, ACBrECFVirtualPrinter, ACBrECFVirtualSAT, ACBrSAT,
+  ACBrPosPrinter,pcnConversao,AcbrUtil,ACBrSATClass, ACBrIntegrador,
+  Vcl.OleCtrls, SHDocVw, Vcl.ComCtrls, ACBrSATExtratoReportClass,
+  ACBrSATExtratoFortesFr, RLFilters, RLPDFFilter, ACBrDFeReport// RLPDFFilter,
+  ;
 
 type
   TfrmVendasBalcao = class(TForm)
@@ -65,7 +67,6 @@ type
     cxMemo1: TcxMemo;
     Label10: TLabel;
     Image1: TImage;
-    ACBrECF1: TACBrECF;
     pnl1: TPanel;
     lbl1: TLabel;
     lbl2: TLabel;
@@ -76,9 +77,6 @@ type
     lbl7: TLabel;
     lbl8: TLabel;
     img1: TImage;
-    ACBrPosPrinter1: TACBrPosPrinter;
-    ACBrSATExtratoESCPOS1: TACBrSATExtratoESCPOS;
-    ACBrSAT1: TACBrSAT;
     edtPesquisa: TEdit;
     edtQuantidade: TEdit;
     edtPreco: TEdit;
@@ -90,6 +88,14 @@ type
     Label9: TLabel;
     edtDesconto: TEdit;
     cxExtrato: TcxButton;
+    cxButton1: TcxButton;
+    ACBrSATExtratoESCPOS1: TACBrSATExtratoESCPOS;
+    ACBrECF1: TACBrECF;
+    ACBrPosPrinter1: TACBrPosPrinter;
+    mVendaEnviar: TcxMemo;
+    RLPDFFilter1: TRLPDFFilter;
+    ACBrSATExtratoFortes1: TACBrSATExtratoFortes;
+    ACBrSAT1: TACBrSAT;
     procedure SPBIniciarVendaClick(Sender: TObject);
     procedure edtPesquisaExit(Sender: TObject);
     procedure spbConfirmarItemClick(Sender: TObject);
@@ -136,7 +142,7 @@ type
     procedure Image2Click(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure AjustarAcbrSat;
-    procedure GerarCupomSat(var mmSat : Tmemo);
+    procedure GerarCupomSat(var mmSat : Tcxmemo);
     procedure ExcluirParcelamentoPedido(qPedido: integer);
     procedure ACBrSAT1GetcodigoDeAtivacao(var Chave: AnsiString);
     procedure ACBrSAT1GetsignAC(var Chave: AnsiString);
@@ -146,14 +152,20 @@ type
     procedure cxExtratoClick(Sender: TObject);
     procedure edtDescontoKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
+    procedure cxButton1Click(Sender: TObject);
+    procedure ACBrSAT1MensagemSEFAZ(ACod: Integer; AMensagem: string);
+
   private
     { Private declarations }
     vStatusVenda : boolean;
     vLinhaInicialMemo,vTipoVenda:string;
     cdsProdutos : TClientDataSet;
     aIdentificadoresPedido : array of integer;
+
   public
     { Public declarations }
+    Function GetImpressora: string;
+
   end;
 
 var
@@ -165,7 +177,7 @@ implementation
 
 uses UDataModul, UntConectaServidor, UProceduresClient, ULogin, UntLookUp,
   UntLookUpClientes, URelatorios, GroupedItems1, UntVendedores,
-  UntLookUpVendedores, UntLookUpProdutos, UntLookUpFormasPagamentos;
+  UntLookUpVendedores, UntLookUpProdutos, UntLookUpFormasPagamentos,Printers, UntMovimentacao;
 
 procedure TfrmVendasBalcao.ACBrSAT1GetcodigoDeAtivacao(var Chave: AnsiString);
 begin
@@ -175,6 +187,12 @@ end;
 procedure TfrmVendasBalcao.ACBrSAT1GetsignAC(var Chave: AnsiString);
 begin
   Chave := frmLogin.pAssinatura;
+end;
+
+procedure TfrmVendasBalcao.ACBrSAT1MensagemSEFAZ(ACod: Integer;
+  AMensagem: string);
+begin
+  MessageDlg( IntToStr(ACod)+'-'+AMensagem, mtWarning, [mbOK], 0);
 end;
 
 procedure TfrmVendasBalcao.AjustarAcbrSat;
@@ -192,12 +210,17 @@ begin
      Config.emit_cRegTrib      := TpcnRegTrib(frmLogin.pRegimeTributario) ;
      Config.emit_cRegTribISSQN := TpcnRegTribISSQN(frmLogin.pTributacaoISSQN) ;
      Config.emit_indRatISSQN   := TpcnindRatISSQN(frmLogin.pIndRatISSQN) ;
- //          Config.PaginaDeCodigo     := sePagCod.Value;
-     Config.EhUTF8             := True;
-     Config.infCFe_versaoDadosEnt := StrToFloat('0,07');
-//     SalvarCFes := True;
-//     PastaCFeVenda := ExtractFilePath(Application.ExeName)+'CfeVenda';
-//     PastaCFeCancelamento := ExtractFilePath(Application.ExeName)+'CfeCancelamento';
+     // Config.PaginaDeCodigo     := sePagCod.Value;
+     Config.EhUTF8 := True;
+     Config.infCFe_versaoDadosEnt := StringToFloatDef('0.08', cversaoDadosEnt);
+     Config.ArqSchema := ExtractFilePath(Application.ExeName)+'Schemas\CfeDadosVendaAPL_0008.xsd';
+     //Config.XmlSignLib := TSSLXmlSignLib(2);
+     //ConfigArquivos.SalvarCFe := True;
+     //ConfigArquivos.SalvarEnvio := True;
+     //ConfigArquivos.PastaCFeVenda:= ExtractFilePath(Application.ExeName)+'xml\CfeVenda';
+     //ConfigArquivos.PastaEnvio:= ExtractFilePath(Application.ExeName)+'xml\CfeEnvio';
+     //     PastaCFeVenda := ExtractFilePath(Application.ExeName)+'CfeVenda';
+     //     PastaCFeCancelamento := ExtractFilePath(Application.ExeName)+'CfeCancelamento';
    end;
 end;
 
@@ -259,7 +282,7 @@ begin
   if vTexto = '' then
     abort;
   try
-    vValor := StrToFloat(vTexto);
+    vValor := StrToFloat( stringReplace( vTexto,'.','',[] ) );
     Conexao := TDSModuleDbClient.Create(DM.SQLConexao.DBXConnection);
     try
       vTexto := AnsiUpperCase(InputBox('Reforço','Motivo da movimentação',''));
@@ -286,7 +309,7 @@ begin
   if vTexto = '' then
     abort;
   try
-    vValor := StrToFloat(vTexto);
+    vValor := StrToFloat( stringReplace( vTexto,'.','',[] ) );
     Conexao := TDSModuleDbClient.Create(DM.SQLConexao.DBXConnection);
     try
       vTexto := AnsiUpperCase(InputBox('Retirada','Motivo da movimentação',''));
@@ -339,17 +362,17 @@ begin
       memo := TMemo.Create(Self);
       memo.Parent := Self.Parent;
       memo.Visible := False;
-      memo.Left := -1000;
-      memo.lines.Clear;
-      memo.lines.Add('</fn></ce><n>Extrato No. 000000');
-      memo.lines.Add(ACBrStr('CUPOM FISCAL ELETRÔNICO - SAT</n>'));
-      memo.lines.Add(' ');
-      memo.lines.Add(' = T E S T E =');
-      memo.lines.Add(' ');
-      memo.lines.Add(StringOfChar('>',48));
-      memo.lines.Add(StringOfChar('>',48));
-      memo.lines.Add(StringOfChar('>',48));
-      ACBrPosPrinter1.Imprimir(memo.Text);
+      Memo.Left := -1000;
+      Memo.lines.Clear;
+      Memo.lines.Add('</fn></ce><n>Extrato No. 000000');
+      Memo.lines.Add(ACBrStr('CUPOM FISCAL ELETRÔNICO - SAT</n>'));
+      Memo.lines.Add(' ');
+      Memo.lines.Add(' = T E S T E =');
+      Memo.lines.Add(' ');
+      Memo.lines.Add(StringOfChar('>',48));
+      Memo.lines.Add(StringOfChar('>',48));
+      Memo.lines.Add(StringOfChar('>',48));
+      ACBrPosPrinter1.Imprimir(Memo.Text);
     except on e:Exception do
       begin
         ShowMessage('Erro gerado : '+e.Message);
@@ -363,20 +386,71 @@ begin
   end;
 end;
 
+procedure TfrmVendasBalcao.cxButton1Click(Sender: TObject);
+var
+  vDataInicial,vDataFinal,vString : string;
+  vData : TDateTime;
+  Rel : TfrmMovimentacao;
+begin
+  try
+    vDataInicial := Trim(InputBox('Data inicial','Informe a data inicial'+#13+
+                             'ex: xx/xx/xxxx',''));
+    if vDataInicial <> '' then
+      vData := StrToDate(vDataInicial);
+  except on e:Exception do
+    begin
+      showmessage('Valor digitado é inválido'+#13+e.Message);
+      abort;
+    end;
+  end;
+
+  try
+     vDataFinal := Trim(InputBox('Data final','Informe a data final'+#13+
+                             'ex: xx/xx/xxxx',''));
+    if vDataFinal <> '' then
+      vData := StrToDate(vDataFinal);
+  except on e:Exception do
+    begin
+      showmessage('Valor digitado é inválido'+#13+e.Message);
+      abort;
+    end;
+  end;
+
+  vDataInicial := stringReplace(vDataInicial,'/','.',[]);
+  vDataFinal := stringReplace(vDataFinal,'/','.',[]);
+
+  vString:= 'SELECT M.ID_PEDIDO, M.ID_PRODUTO,IT.DESCRICAO_PRODUTO,M.DATA,M.HORA, M.QTDE_ANTERIOR, M.QTDE_MOVIMENTADA,M.TIPO_MOVIMENTACAO '+
+            '  FROM MOVIMENTACOES M '+
+            '  LEFT OUTER JOIN PEDIDOS P ON P.ID_PEDIDO = M.ID_PEDIDO '+
+            '  LEFT OUTER JOIN PEDIDOS_ITENS IT ON IT.ID_PEDIDO = P.ID_PEDIDO AND IT.ID_PRODUTO = M.ID_PRODUTO '+
+            ' WHERE M.DATA >= '+ QuotedStr(vDataInicial) + ' and M.DATA <= ' + QuotedStr(vDataFinal);
+
+  if not Assigned(Rel) then
+    Rel := TfrmMovimentacao.Create(Self);
+
+
+  Rel.cdsRelatorioGerencial.Close;
+  Rel.cdsRelatorioGerencial.CommandText := vString;
+  Rel.cdsRelatorioGerencial.Open;
+  Rel.QRRelatorioGerencial.Preview;
+  FreeAndNil(Rel);
+end;
+
 procedure TfrmVendasBalcao.cxExtratoClick(Sender: TObject);
 var
-  vString,vNome,vCpf,vEndereco,Aliquota,vPermiteTroco,
-  vEfetuaMovimentacaoCliente,vTexto,vTextoAux : string;
-  vContador,vFormaPagamento,vContadorCPF:integer;
-  vSomaValorTotal,vValorPago,vLimiteCliente : Real;
-  vConectaServidor : TDSModuleDbClient;
-  iRetorno : integer;
-  LookUp : TfrmLookUp;
-  vCPFCorreto : boolean;
-  meuClient : TClientDataSet;
-  I: Integer;
-  TotalItem,TotalGeralItem:Double;
-  memo : TMemo;
+  ///vString,
+  //vNome,vCpf,vEndereco,Aliquota,vPermiteTroco,
+  //vEfetuaMovimentacaoCliente,vTexto,vTextoAux : string;
+  //vContador,vFormaPagamento,vContadorCPF:integer;
+  //vSomaValorTotal,vValorPago,vLimiteCliente : Real;
+//  vConectaServidor : TDSModuleDbClient;
+  //iRetorno : integer;
+//  LookUp : TfrmLookUp;
+  //vCPFCorreto : boolean;
+  //meuClient : TClientDataSet;
+  //I: Integer;
+  //TotalItem,TotalGeralItem:Double;
+  memo : TcxMemo;
 begin
   DM.OpenDialog1.Title:='Escolha um arquivo xml para emitir a 2ª via do extrato';
   DM.OpenDialog1.filter:='Arquivos XML (*.xml)|*.xml|Todos os arquivos|*.*';
@@ -388,13 +462,14 @@ begin
     AjustarAcbrSat;
     ACBrSAT1.InicializaCFe ;
     ACBrSAT1.CFe.LoadFromFile(DM.OpenDialog1.FileName);
-    memo := TMemo.Create(Self);
+    memo := TcxMemo.Create(Self);
     memo.Parent := Self.Parent;
     memo.Visible := False;
 
     memo.Lines.Clear;
     memo.Lines.Text := ACBrSAT1.CFe.AsXMLString;
-    ACBrPosPrinter1.Device.Baud := 115200;
+
+    (*ACBrPosPrinter1.Device.Baud := 115200;
     ACBrPosPrinter1.ColunasFonteNormal := 48;
     ACBrPosPrinter1.EspacoEntreLinhas := 0;
     ACBrPosPrinter1.LinhasEntreCupons := 0;
@@ -407,9 +482,24 @@ begin
     ACBrPosPrinter1.ConfigLogo.FatorY := 1;
     ACBrPosPrinter1.ConfigBarras.LarguraLinha := 0;
     ACBrPosPrinter1.ConfigBarras.Altura := 0;
-    ACBrPosPrinter1.ConfigBarras.MostrarCodigo := False;
-    GerarCupomSat(memo);
-    ACBrPosPrinter1.Imprimir(memo.Text);
+    ACBrPosPrinter1.ConfigBarras.MostrarCodigo := False;*)
+    //GerarCupomSat(memo);
+    //ACBrPosPrinter1.Imprimir(memo.Text);
+    ACBrSATExtratoFortes1.Impressora:= GetImpressora;
+    ACBrSATExtratoFortes1.LarguraBobina       := 286;
+    ACBrSATExtratoFortes1.MargemSuperior      := 0;
+    ACBrSATExtratoFortes1.MargemInferior    := 0;
+    ACBrSATExtratoFortes1.MargemEsquerda := 4;
+    ACBrSATExtratoFortes1.MargemDireita     := 2;
+
+    ACBrSAT1.Extrato := ACBrSATExtratoFortes1;
+    ACBrSAT1.Extrato.ImprimeQRCode:= false;
+    //ACBrSAT1.Extrato.ImprimeMsgOlhoNoImposto:= true;
+    ACBrSAT1.Extrato.ImprimeDescAcrescItem:= true;
+    ACBrSAT1.Extrato.ImprimeEmUmaLinha:= true;
+            //ACBrSAT1.Extrato.
+            //ACBrSATExtratoFortes1.MostrarPreview   := true;
+    ACBrSAT1.ImprimirExtrato;
   end;
 end;
 
@@ -431,7 +521,7 @@ end;
 
 procedure TfrmVendasBalcao.edtDescontoExit(Sender: TObject);
 var
-  vDesconto:real;
+  vDesconto: real;
   vTeste : string;
 begin
   if vStatusVenda then
@@ -448,9 +538,9 @@ begin
       begin
         try
           if edtDesconto.Text <> '' then
-            edtSubTotal.Text := FormatFloat('###,###,##0.00',StrToFloat(edtPrecoTotal.Text) - StrToFloat(edtDesconto.Text))
+            edtSubTotal.Text := FormatFloat('###,###,##0.00',StrToFloat( stringReplace(edtPrecoTotal.Text,'.','',[]) ) - StrToFloat( stringReplace(edtDesconto.Text,'.','',[]) ) )
           else
-            edtSubTotal.Text := FormatFloat('###,###,##0.00',StrToFloat(edtPrecoTotal.Text));
+            edtSubTotal.Text := FormatFloat('###,###,##0.00',StrToFloat( stringReplace(edtPrecoTotal.Text,'.','',[]) ) );
 
         except
           edtSubTotal.Text:= FormatFloat('###,###,##0.00',0);
@@ -591,7 +681,7 @@ begin
       else
       begin
         try
-          vPrecoTotal := StrToFloat(edtQuantidade.Text) * StrToFloat(edtPreco.Text);
+          vPrecoTotal := StrToFloat( stringReplace(edtQuantidade.Text,'.','',[]) ) * StrToFloat( stringReplace(edtPreco.Text,'.','',[]) );
           edtPrecoTotal.Text := FormatFloat('###,###,##0.00',vPrecoTotal);
         except
           edtPrecoTotal.Text := '';
@@ -654,7 +744,7 @@ begin
         if (vTeste[1] in ['0'..'9']) then
         begin
           if Trim(edtPreco.Text) <> '' then
-            edtPrecoTotal.Text := FormatFloat('###,###,##0.00',StrToFloat(edtQuantidade.Text) * StrToFloat(edtPreco.Text));
+            edtPrecoTotal.Text := FormatFloat('###,###,##0.00',StrToFloat( stringReplace(edtQuantidade.Text,'.','',[]) ) * StrToFloat( stringReplace(edtPreco.Text,'.','',[]) ));
         end;
       except
         edtPrecoTotal.Text := '';
@@ -726,6 +816,8 @@ begin
     end;
   end;
   cxMemo1.Lines.Clear;
+  if ACBrSAT1.Inicializado then
+    ACBrSAT1.DesInicializar;
 end;
 
 procedure TfrmVendasBalcao.FormKeyDown(Sender: TObject; var Key: Word;
@@ -748,7 +840,8 @@ begin
   if Key = VK_F7 then
     spbCancelarCupomFiscalClick(self);
 
-  if (vStatusVenda) and (frmLogin.pMovimentaCaixa) then
+
+  if (vStatusVenda) and (frmLogin.pMovimentaCaixa)  then
   begin
     if Key = VK_F2 then
       spbCancelarItemClick(Self);
@@ -770,14 +863,14 @@ var
   Conexao : TDSModuleDbClient;
   TipoAliquota : Char;
 begin
-  if AnsiUpperCase(frmLogin.pNomeUsuario) = 'BUSINESS' then
-  begin
-    btnTestarImpressao.Visible := True;
-  end
-  else
-  begin
-    btnTestarImpressao.Visible := False;
-  end;
+//  if AnsiUpperCase(frmLogin.pNomeUsuario) = 'BUSINESS' then
+//  begin
+//    btnTestarImpressao.Visible := True;
+//  end
+//  else
+//  begin
+//    btnTestarImpressao.Visible := False;
+//  end;
   if frmLogin.pSat_ECF = 0 then
   begin
     cdsProdutos := TClientDataSet.Create(Self);
@@ -832,9 +925,17 @@ begin
     vTipoVenda := '';
     DM.cdsPedidos.Close;
     DM.cdsPedidos.Open;
-    DM.cdsPedidos_Itens.Close;
-    DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := -1;
+    //DM.cdsPedidos_Itens.Close;
+    //DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := -1;
+    //dm.cdsPedidos_Itens.Open;
+
+    dm.cdsPedidos_Itens.close;
+    dm.cdsPedidos_Itens.Filtered := False;
+    dm.cdsPedidos_Itens.Filter := '';
+    dm.cdsPedidos_Itens.CommandText := 'SELECT * FROM PEDIDOS_ITENS where id_pedido = '+inttostr(dm.cdsPedidosID_PEDIDO.AsInteger) + ' ORDER BY ID_PEDIDO_ITEM';
     dm.cdsPedidos_Itens.Open;
+
+
     if (frmLogin.pModeloImpressora <> '7') and (frmLogin.pModeloImpressora <> '9') then
     begin
       ACBrECF1.Porta := frmLogin.pPortaImpressora;
@@ -883,10 +984,10 @@ begin
         else
           vValorAliquota := IntToStr(dm.cdsGenerico.FieldByName('ALIQUOTA_ICMS').AsInteger);
 
-        vAliquota := ACBrECF1.AchaICMSAliquota(StrToFloat(vValorAliquota));
+        vAliquota := ACBrECF1.AchaICMSAliquota(StrToFloat( stringReplace( vValorAliquota,'.','',[]) ));
         if vAliquota = nil then
           try
-            ACBrECF1.ProgramaAliquota(StrToFloat(vValorAliquota),'T','');
+            ACBrECF1.ProgramaAliquota(StrToFloat(stringReplace( vValorAliquota,'.','',[])),'T','');
           except on e:exception do
             begin
               MessageDlg('O sistema não conseguiu programar a alíquota na impressora fiscal'+#13+
@@ -966,22 +1067,29 @@ begin
       if ACBrSAT1.Extrato = ACBrSATExtratoESCPOS1 then
       begin
         ACBrPosPrinter1.Desativar;
-        //ACBrPosPrinter1.Modelo := TACBrPosPrinterModelo( cbxModeloPosPrinter.ItemIndex );
+        //ACBrPosPrinter1.Modelo := TACBrPosPrinterModelo(1);//TACBrPosPrinterModelo( cbxModeloPosPrinter.ItemIndex );
         //ACBrPosPrinter1.PaginaDeCodigo := TACBrPosPaginaCodigo( cbxPagCodigo.ItemIndex );
         ACBrPosPrinter1.Porta := frmLogin.pPortaImpressora;
         //ACBrPosPrinter1.ColunasFonteNormal := seColunas.Value;
         //ACBrPosPrinter1.LinhasEntreCupons := seLinhasPular.Value;
         //ACBrPosPrinter1.EspacoEntreLinhas := seEspLinhas.Value;
-        ACBrSATExtratoESCPOS1.ImprimeQRCode := True;
+        ACBrSATExtratoESCPOS1.ImprimeQRCode := false;
         //ACBrSATExtratoESCPOS1.ImprimeEmUmaLinha := cbImprimir1Linha.Checked;
       end;
       vStatusVenda := False;
       vTipoVenda := '';
       DM.cdsPedidos.Close;
       DM.cdsPedidos.Open;
-      DM.cdsPedidos_Itens.Close;
-      DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := -1;
+//      DM.cdsPedidos_Itens.Close;
+//      dm.cdsPedidos_Itens.CommandText := 'SELECT * FROM PEDIDOS_ITENS where id_pedido = :ID_PEDIDO';
+//      DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := -1;
+//      dm.cdsPedidos_Itens.Open;
+      dm.cdsPedidos_Itens.close;
+      dm.cdsPedidos_Itens.Filtered := False;
+      dm.cdsPedidos_Itens.Filter := '';
+      dm.cdsPedidos_Itens.CommandText := 'SELECT * FROM PEDIDOS_ITENS where id_pedido = '+inttostr(dm.cdsPedidosID_PEDIDO.AsInteger) + ' ORDER BY ID_PEDIDO_ITEM';
       dm.cdsPedidos_Itens.Open;
+
       AjustarAcbrSat;
       ACBrSAT1.Inicializar;
     end;
@@ -989,7 +1097,7 @@ begin
   Self.SetFocus;
 end;
 
-procedure TfrmVendasBalcao.GerarCupomSat(var mmSat: Tmemo);
+procedure TfrmVendasBalcao.GerarCupomSat(var mmSat: Tcxmemo);
 var
   nCFe: String;
   function FormatarCEP(const AValue: String): String;
@@ -1095,13 +1203,13 @@ var
       sUnidade     := Trim(ACBrSAT1.CFe.Det.Items[i].Prod.uCom);
       sVlrProduto  := FormatFloat('#,###,##0.00', ACBrSAT1.CFe.Det.Items[i].Prod.vProd);
 
-      if (Length( Trim( ACBrSAT1.CFe.Det.Items[i].Prod.cEAN ) ) > 0) and (ACBrSATExtratoESCPOS1.UsaCodigoEanImpressao) then
+      if (Length( Trim( ACBrSAT1.CFe.Det.Items[i].Prod.cEAN ) ) > 0) and (ACBrSATExtratoESCPOS1.ImprimeCodigoEan) then
         sCodigo := Trim(ACBrSAT1.CFe.Det.Items[i].Prod.cEAN)
       else
         sCodigo := Trim(ACBrSAT1.CFe.Det.Items[i].Prod.cProd);
 
       // formatar conforme configurado
-      sVlrUnitario := FormatFloatBr(ACBrSAT1.CFe.Det.Items[i].Prod.VUnCom,ACBrSATExtratoESCPOS1.Mask_vUnCom );
+      sVlrUnitario := FormatFloatBr(ACBrSAT1.CFe.Det.Items[i].Prod.VUnCom,'0.00');
       if ACBrSAT1.CFe.Det.Items[i].Imposto.vItem12741 > 0 then
         sVlrImpostos := ' ('+FormatFloatBr(ACBrSAT1.CFe.Det.Items[i].Imposto.vItem12741, '0.00')+') '
       else
@@ -1111,7 +1219,7 @@ var
       // caso contrário mostrar somente o número inteiro
       fQuant := ACBrSAT1.CFe.Det.Items[i].Prod.QCom;
       if Frac(fQuant) > 0 then
-        sQuantidade := FormatFloatBr(fQuant, ACBrSATExtratoESCPOS1.Mask_qCom )
+        sQuantidade := FormatFloatBr(fQuant, '0.00' )
       else
         sQuantidade := FloatToStr(fQuant);
 
@@ -1243,6 +1351,7 @@ var
     for i:=0 to ACBrSAT1.CFe.InfAdic.obsFisco.Count - 1 do
        mmSat.Lines.Add('<c>'+ACBrSAT1.CFe.InfAdic.obsFisco.Items[i].xCampo+'-'+
                                     ACBrSAT1.CFe.InfAdic.obsFisco.Items[i].xTexto);
+
   end;
 
   procedure GerarDadosEntrega;
@@ -1384,6 +1493,19 @@ begin
   GerarRodape;
 end;
 
+function TfrmVendasBalcao.GetImpressora: string;
+begin
+    if(Printer.PrinterIndex > 0)then
+    begin
+      Showmessage(Printer.Printers[Printer.PrinterIndex]);
+      Result := Printer.Printers[Printer.PrinterIndex];
+    end
+    else
+    begin
+      Result := 'SemImpressora';
+    end;
+end;
+
 procedure TfrmVendasBalcao.Image2Click(Sender: TObject);
 begin
   Self.Close;
@@ -1406,7 +1528,7 @@ begin
     ShowPreview:=False;
   end;
   DM.cdsPedidos_Itens.First;
-  VDOCaPrinter1.Print(10,'Bem Vindo(a) a BijouxNet ',True);
+  VDOCaPrinter1.Print(10,'Bem Vindo(a) a '+frmLogin.sFantasia,True);
   VDOCaPrinter1.Print(0,'Data : '+FormatDateTime('dd/mm/yyyy',Now));
   VDOCaPrinter1.Print(20,'Pedido : '+IntToStr(DM.cdsPedidosID_PEDIDO.AsInteger),True);
   VDOCaPrinter1.Print(0,'---------------------------------------',True);
@@ -1461,7 +1583,7 @@ begin
 
   vStatusVenda := True;
   vTipoVenda := 'VENDA INICIADA';
-  vString := '   Bem vindo(a) a BijouxNet. '+'Data : '+DateToStr(Date)+'  Hora : '+
+  vString := '   Bem vindo(a) a '+frmLogin.sFantasia +'Data : '+DateToStr(Date)+'  Hora : '+
                  FormatDateTime('hh:mm:ss',Time);
   vLinhaInicialMemo := vString;
   cxMemo1.Lines.Add(vString);
@@ -1482,8 +1604,13 @@ begin
   DM.cdsPedidos.CommandText := 'SELECT * FROM PEDIDOS WHERE ID_PEDIDO = '+IntToStr(vPedido);
   DM.cdsPedidos.Open;
   vString := '   Pedido Nº : '+IntToStr(DM.cdsPedidosID_PEDIDO.AsInteger);
-  DM.cdsPedidos_Itens.Close;
-  DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := DM.cdsPedidosID_PEDIDO.AsInteger;
+  //DM.cdsPedidos_Itens.Close;
+  //DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := DM.cdsPedidosID_PEDIDO.AsInteger;
+  //dm.cdsPedidos_Itens.Open;
+  dm.cdsPedidos_Itens.close;
+  dm.cdsPedidos_Itens.Filtered := False;
+  dm.cdsPedidos_Itens.Filter := '';
+  dm.cdsPedidos_Itens.CommandText := 'SELECT * FROM PEDIDOS_ITENS where id_pedido = '+inttostr(dm.cdsPedidosID_PEDIDO.AsInteger) + ' ORDER BY ID_PEDIDO_ITEM';
   dm.cdsPedidos_Itens.Open;
   cxMemo1.Lines.Add(vString);
   FreeAndNil(Conexao);
@@ -1529,6 +1656,21 @@ begin
   begin
     try
       ACBrSAT1.CancelarUltimaVenda;
+      ACBrSATExtratoFortes1.Impressora:= GetImpressora;
+      ACBrSATExtratoFortes1.LarguraBobina       := 286;
+      ACBrSATExtratoFortes1.MargemSuperior      := 0;
+      ACBrSATExtratoFortes1.MargemInferior      := 0;
+      ACBrSATExtratoFortes1.MargemEsquerda      := 4;
+      ACBrSATExtratoFortes1.MargemDireita       := 2;
+
+      ACBrSAT1.Extrato := ACBrSATExtratoFortes1;
+      ACBrSAT1.Extrato.ImprimeQRCode:= false;
+      //ACBrSAT1.Extrato.ImprimeMsgOlhoNoImposto:= true;
+      ACBrSAT1.Extrato.ImprimeDescAcrescItem:= true;
+      ACBrSAT1.Extrato.ImprimeEmUmaLinha:= true;
+      ACBrSAT1.Extrato.Sistema:= 'Business Controller';
+      ACBrSAT1.ImprimirExtratoCancelamento;
+
       MessageDlg('O pedido nº '+IntToStr(idpedido) +' foi cancelado'+#13+
                  'assim como o NFc-e nº '+ACBrsat1.CFe.infCFe.ID,mtConfirmation,[mbOK],0);
     except on e:Exception do
@@ -1586,11 +1728,12 @@ with VDOCaPrinter1 do
     ShowDialog:=false;
     ShowPreview:=False;
   end;
-  VDOCaPrinter1.Print(16,'BijouxNet ',True);
+  VDOCaPrinter1.Print(16,frmLogin.sFantasia,True);
   VDOCaPrinter1.Print(3,'Data : '+FormatDateTime('dd/mm/yyyy',Now));
   VDOCaPrinter1.Print(31,'Pedido : '+IntToStr(DM.cdsPedidosID_PEDIDO.AsInteger),True);
   VDOCaPrinter1.EndDoc;
 end;
+
 
 procedure TfrmVendasBalcao.spbGerarNFeClick(Sender: TObject);
 //var
@@ -1752,7 +1895,7 @@ begin
   DM.cdsPedidos.Open;
   vStatusVenda := True;
   if vLinhaInicialMemo = '' then
-    vLinhaInicialMemo := '   Bem vindo(a) a BijouxNet. '+'Data : '+DateToStr(Date)+'  Hora : '+
+    vLinhaInicialMemo := '   Bem vindo(a) a '+frmLogin.sFantasia +'. Data : '+DateToStr(Date)+'  Hora : '+
                FormatDateTime('hh:mm:ss',Time);
   vString := '';
   cxMemo1.Lines.Clear;
@@ -1771,7 +1914,7 @@ begin
                  'Qtde.: '+FloatToStr(dm.cdsPedidos_ItensQUANTIDADE.AsFloat) +'  X  '+
                  'R$: '+FormatFloat('###,###,##0.00',dm.cdsPedidos_ItensVALOR_UNITARIO.AsFloat) +
                  '  =  ' +'R$: '+FormatFloat('###,###,##0.00',dm.cdsPedidos_ItensVALOR_TOTAL.AsFloat) +
-                 ' - '+ FormatFloat('###,###,##0.00',StrToFloat(edtDesconto.Text))
+                 ' - '+ FormatFloat('###,###,##0.00',StrToFloat( stringReplace( edtDesconto.Text,'.','',[]) ))
     else
       vString := '   '+DM.cdsPedidos_ItensDESCRICAO_PRODUTO.AsString +'   '+
                  'Qtde.: '+FloatToStr(dm.cdsPedidos_ItensQUANTIDADE.AsFloat) +'  X  '+
@@ -1785,7 +1928,7 @@ begin
   vTipoVenda := 'VENDA CAPTURADA';
 
   if edtDesconto.Text <> '' then
-    edtSubTotal.Text := FormatFloat('###,###,##0.00',vSubTotal - StrToFloat(edtDesconto.Text))
+    edtSubTotal.Text := FormatFloat('###,###,##0.00',vSubTotal - StrToFloat( stringReplace( edtDesconto.Text,'.','',[]) ))
   else
     edtSubTotal.Text := FormatFloat('###,###,##0.00',vSubTotal);
 end;
@@ -1864,7 +2007,7 @@ begin
   
   vStatusVenda := True;
   if vLinhaInicialMemo = '' then
-    vLinhaInicialMemo := '   Bem vindo(a) a BijouxNet. '+'Data : '+DateToStr(Date)+'  Hora : '+
+    vLinhaInicialMemo := '   Bem vindo(a) a '+frmLogin.sFantasia+'. Data : '+DateToStr(Date)+'  Hora : '+
                FormatDateTime('hh:mm:ss',Time);
   vString := '';
   cxMemo1.Lines.Clear;
@@ -1873,9 +2016,15 @@ begin
   vString := '   Pedido Nº : '+IntToStr(DM.cdsPedidosID_PEDIDO.AsInteger);
   cxMemo1.Lines.Add(vString);
 
-  DM.cdsPedidos_Itens.Close;
-  DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := DM.cdsPedidosID_PEDIDO.AsInteger;
+//  DM.cdsPedidos_Itens.Close;
+//  DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := DM.cdsPedidosID_PEDIDO.AsInteger;
+//  dm.cdsPedidos_Itens.Open;
+  dm.cdsPedidos_Itens.close;
+  dm.cdsPedidos_Itens.Filtered := False;
+  dm.cdsPedidos_Itens.Filter := '';
+  dm.cdsPedidos_Itens.CommandText := 'SELECT * FROM PEDIDOS_ITENS where id_pedido = '+inttostr(dm.cdsPedidosID_PEDIDO.AsInteger) + ' ORDER BY ID_PEDIDO_ITEM';
   dm.cdsPedidos_Itens.Open;
+
   DM.cdsPedidos_Itens.First;
   vSubTotal := 0;
   while not dm.cdsPedidos_Itens.Eof do
@@ -1885,7 +2034,7 @@ begin
                  'Qtde.: '+FloatToStr(dm.cdsPedidos_ItensQUANTIDADE.AsFloat) +'  X  '+
                  'R$: '+FormatFloat('###,###,##0.00',dm.cdsPedidos_ItensVALOR_UNITARIO.AsFloat) +'  =  '+
                  'R$: '+FormatFloat('###,###,##0.00',dm.cdsPedidos_ItensVALOR_TOTAL.AsFloat) + '  -  '+
-                 FormatFloat('###,###,##0.00',StrToFloat(edtDesconto.Text))
+                 FormatFloat('###,###,##0.00',StrToFloat( stringReplace( edtDesconto.Text,'.','',[]) ))
     else
       vString := '   '+DM.cdsPedidos_ItensDESCRICAO_PRODUTO.AsString +'   '+
                  'Qtde.: '+FloatToStr(dm.cdsPedidos_ItensQUANTIDADE.AsFloat) +'  X  '+
@@ -1896,7 +2045,7 @@ begin
     dm.cdsPedidos_Itens.Next;
   end;
   if edtDesconto.Text <> '' then
-    edtSubTotal.Text := FormatFloat('###,###,##0.00',vSubTotal - StrToFloat(edtDesconto.Text))
+    edtSubTotal.Text := FormatFloat('###,###,##0.00',vSubTotal - StrToFloat( stringReplace(edtDesconto.Text,'.','',[]) ))
   else
     edtSubTotal.Text := FormatFloat('###,###,##0.00',vSubTotal);      
   vTipoVenda := 'VENDA CAPTURADA';
@@ -1910,17 +2059,23 @@ begin
   ACBrECF1.Ativar;
   ACBrECF1.LerTotaisAliquota;
   vValorAliquota := '1800';
-  vAliquota := ACBrECF1.AchaICMSAliquota(StrToFloat(vValorAliquota));
+  vAliquota := ACBrECF1.AchaICMSAliquota(StrToFloat( stringReplace( vValorAliquota,'.','',[] ) ));
   if vAliquota = nil then
-    ACBrECF1.ProgramaAliquota(StrToFloat(vValorAliquota),'T','');
+    ACBrECF1.ProgramaAliquota(StrToFloat( stringReplace( vValorAliquota,'.','',[]) ),'T','');
+
 end;
 
 procedure TfrmVendasBalcao.spbCancelarVendaClick(Sender: TObject);
 begin
   if MessageDlg('Deseja realmente cancelar o pedido '+IntToStr(DM.cdsPedidosID_PEDIDO.AsInteger)+'?',mtInformation,[mbYes,mbNo],0) = mrYes then
   begin
-    DM.cdsPedidos_Itens.Close;
-    DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := DM.cdsPedidosID_PEDIDO.AsInteger;
+//    DM.cdsPedidos_Itens.Close;
+//    DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := DM.cdsPedidosID_PEDIDO.AsInteger;
+//    dm.cdsPedidos_Itens.Open;
+    dm.cdsPedidos_Itens.close;
+    dm.cdsPedidos_Itens.Filtered := False;
+    dm.cdsPedidos_Itens.Filter := '';
+    dm.cdsPedidos_Itens.CommandText := 'SELECT * FROM PEDIDOS_ITENS where id_pedido = '+inttostr(dm.cdsPedidosID_PEDIDO.AsInteger) + ' ORDER BY ID_PEDIDO_ITEM';
     dm.cdsPedidos_Itens.Open;
     DM.cdsPedidos_Itens.First;
     while not DM.cdsPedidos_Itens.Eof do
@@ -1983,8 +2138,8 @@ begin
   else
   begin
     try
-      vQuantidade := StrToFloat(InputBox('Cancelamento de item','Informe a quantidade'+#13+
-                                       'a ser retirada',''));
+      vQuantidade := StrToFloat( stringReplace( InputBox('Cancelamento de item','Informe a quantidade'+#13+
+                                       'a ser retirada',''),'.','',[])   );
     except
       showmessage('Quantidade inválida');
       abort;
@@ -2028,7 +2183,7 @@ begin
                  'Qtde.: '+FloatToStr(dm.cdsPedidos_ItensQUANTIDADE.AsFloat) +'  X  '+
                  'R$: '+FormatFloat('###,###,##0.00',dm.cdsPedidos_ItensVALOR_UNITARIO.AsFloat) +
                  '  =  ' +'R$: '+FormatFloat('###,###,##0.00',dm.cdsPedidos_ItensVALOR_TOTAL.AsFloat) +
-                 ' - '+ FormatFloat('###,###,##0.00',StrToFloat(edtDesconto.Text))
+                 ' - '+ FormatFloat('###,###,##0.00',StrToFloat( stringReplace( edtDesconto.Text ,'.','',[]) ))
     else
       vString := '   '+DM.cdsPedidos_ItensDESCRICAO_PRODUTO.AsString +'   '+
                  'Qtde.: '+FloatToStr(dm.cdsPedidos_ItensQUANTIDADE.AsFloat) +'  X  '+
@@ -2041,7 +2196,7 @@ begin
       dm.cdsPedidos_Itens.Next;
     end;
     if edtDesconto.Text <> '' then    
-      edtSubTotal.Text := FormatFloat('###,###,##0.00',vSubTotal - StrToFloat(edtDesconto.Text))
+      edtSubTotal.Text := FormatFloat('###,###,##0.00',vSubTotal - StrToFloat( stringReplace( edtDesconto.Text, '.','',[] ) ))
     else
       edtSubTotal.Text := FormatFloat('###,###,##0.00',vSubTotal);  
   end;
@@ -2057,39 +2212,62 @@ var
     vProximoPasso;
 begin
   vValorUnitario := 0;
-  vValorUnitario := StrToFloat(edtPreco.Text);
+  vValorUnitario := StrToFloat( stringReplace(edtPreco.Text,'.','',[]) );
   if edtDesconto.text <> '' then
-    vDesconto := StrToFloat(edtDesconto.Text)
+    vDesconto := StrToFloat( stringReplace(edtDesconto.Text,'.','',[]) )
   else
     vDesconto := 0;
 
-  DM.cdsPedidos_Itens.Close;
-  DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := DM.cdsPedidosID_PEDIDO.AsInteger;
+//  DM.cdsPedidos_Itens.Close;
+//  DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := DM.cdsPedidosID_PEDIDO.AsInteger;
+//  dm.cdsPedidos_Itens.Open;
+  dm.cdsPedidos_Itens.close;
+  dm.cdsPedidos_Itens.Filtered := False;
+  dm.cdsPedidos_Itens.Filter := '';
+  dm.cdsPedidos_Itens.CommandText := 'SELECT * FROM PEDIDOS_ITENS where id_pedido = '+inttostr(dm.cdsPedidosID_PEDIDO.AsInteger) + ' ORDER BY ID_PEDIDO_ITEM';
   dm.cdsPedidos_Itens.Open;
+
   if DM.cdsPedidos_Itens.Locate('ID_PRODUTO;ID_PEDIDO;VALOR_UNITARIO',VarArrayOf([cdsProdutos.FieldByName('PRO_ID').AsInteger,
                                                                                   DM.cdsPedidosID_PEDIDO.AsInteger,
                                                                                   vValorUnitario]),[]) = False then
   begin
     if cdsProdutos.FieldByName('PRO_SALDO').AsFloat > 0 then
     begin
-      if StrToFloat(edtQuantidade.Text) <= cdsProdutos.FieldByName('PRO_SALDO').AsFloat then
+       if StrToFloat( stringReplace( edtQuantidade.Text,'.','',[] ) ) <= cdsProdutos.FieldByName('PRO_SALDO').AsFloat then
       begin
         Conexao := TDSModuleDbClient.Create(DM.SQLConexao.DBXConnection);
         DM.cdsPedidos_Itens.Insert;
-        // DM.cdsPedidos_ItensID_PEDIDO_ITEM.Value := Conexao.GeneratorIncrementado('NOVO_PEDIDO_ITEM');
-        DM.cdsPedidos_ItensQUANTIDADE.Value := StrToFloat(edtQuantidade.Text);
-        vTotalAuxiliar := (StrToFloat(edtQuantidade.Text) * vValorUnitario) - vDesconto;
-        DM.cdsPedidos_ItensVALOR_TOTAL.asfloat := vTotalAuxiliar;// StrToFloat(FormatFloat('###,###,##0.00',StrToFloat(edtPrecoTotal.Text)));
+        DM.cdsPedidos_ItensQUANTIDADE.Value := StrToFloat( stringReplace( edtQuantidade.Text, '.','',[] ) );
+        vTotalAuxiliar := (StrToFloat( stringReplace( edtQuantidade.Text,'.','',[]) ) * vValorUnitario) - vDesconto;
+        DM.cdsPedidos_ItensVALOR_TOTAL.asfloat := vTotalAuxiliar;
         FreeAndNil(Conexao);
       end
-      else
+      else if (frmLogin.pSaldoNegativo = 'S') then
+      begin
+        Conexao := TDSModuleDbClient.Create(DM.SQLConexao.DBXConnection);
+        DM.cdsPedidos_Itens.Insert;
+        DM.cdsPedidos_ItensQUANTIDADE.Value := StrToFloat( stringReplace( edtQuantidade.Text,'.','',[] ) );
+        vTotalAuxiliar := (StrToFloat(stringReplace( edtQuantidade.Text,'.','',[])) * vValorUnitario) - vDesconto;
+        DM.cdsPedidos_ItensVALOR_TOTAL.asfloat := vTotalAuxiliar;
+        FreeAndNil(Conexao);
+      end
+      else if (frmLogin.pSaldoNegativo <> 'S') then
       begin
         MessageDlg('O produto '+cdsProdutos.FieldByName('PRO_DESCRICAO').AsString+' não possui saldo suficiente'+#13+
                  'para realizar esta venda',mtError,[mbok],0);
         goto vProximoPasso;
       end;
     end
-    else
+    else if (frmLogin.pSaldoNegativo = 'S') then
+    begin
+      Conexao := TDSModuleDbClient.Create(DM.SQLConexao.DBXConnection);
+      DM.cdsPedidos_Itens.Insert;
+      DM.cdsPedidos_ItensQUANTIDADE.Value := StrToFloat( stringReplace( edtQuantidade.Text,'.','',[] ));
+      vTotalAuxiliar := (StrToFloat( stringReplace( edtQuantidade.Text,'.','',[] ) ) * vValorUnitario) - vDesconto;
+      DM.cdsPedidos_ItensVALOR_TOTAL.asfloat := vTotalAuxiliar;
+      FreeAndNil(Conexao);
+    end
+    else if (frmLogin.pSaldoNegativo <> 'S') then
     begin
       MessageDlg('O produto '+cdsProdutos.FieldByName('PRO_DESCRICAO').AsString+' não possui saldo suficiente'+#13+
                  'para realizar esta venda',mtError,[mbok],0);
@@ -2098,11 +2276,17 @@ begin
   end
   else
   begin
-    if (DM.cdsPedidos_ItensQUANTIDADE.AsFloat + StrToFloat(edtQuantidade.Text)) <= cdsProdutos.FieldByName('PRO_SALDO').AsFloat then
+    if (DM.cdsPedidos_ItensQUANTIDADE.AsFloat + StrToFloat( stringReplace( edtQuantidade.Text,'.','',[] ) )) <= cdsProdutos.FieldByName('PRO_SALDO').AsFloat then
     begin
       DM.cdsPedidos_Itens.Edit;
-      DM.cdsPedidos_ItensQUANTIDADE.Value := DM.cdsPedidos_ItensQUANTIDADE.AsFloat + StrToFloat(edtQuantidade.Text);
-      DM.cdsPedidos_ItensVALOR_TOTAL.Value := DM.cdsPedidos_ItensVALOR_TOTAL.AsFloat + StrToFloat(edtPrecoTotal.Text);
+      DM.cdsPedidos_ItensQUANTIDADE.Value := DM.cdsPedidos_ItensQUANTIDADE.AsFloat + StrToFloat( stringReplace(edtQuantidade.Text,'.','',[]) );
+      DM.cdsPedidos_ItensVALOR_TOTAL.Value := DM.cdsPedidos_ItensVALOR_TOTAL.AsFloat + StrToFloat( stringReplace(edtPrecoTotal.Text,'.','',[]) );
+    end
+    else if (frmLogin.pSaldoNegativo = 'S') then
+    begin
+      DM.cdsPedidos_Itens.Edit;
+      DM.cdsPedidos_ItensQUANTIDADE.Value := DM.cdsPedidos_ItensQUANTIDADE.AsFloat + StrToFloat(stringReplace( edtQuantidade.Text,',','',[]) );
+      DM.cdsPedidos_ItensVALOR_TOTAL.Value := DM.cdsPedidos_ItensVALOR_TOTAL.AsFloat + StrToFloat( stringReplace(edtPrecoTotal.Text,'.','',[]) );
     end
     else
     begin
@@ -2127,8 +2311,14 @@ begin
   //DM.cdsPedidos_Itens.Filtered := False;
   //DM.cdsPedidos_Itens.Filter := 'ID_PEDIDO = '+IntToStr(DM.cdsPedidosID_PEDIDO.AsInteger);
   //dm.cdsPedidos_Itens.Filtered := True;
-  DM.cdsPedidos_Itens.Close;
-  DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := DM.cdsPedidosID_PEDIDO.AsInteger;
+//  DM.cdsPedidos_Itens.Close;
+//  DM.cdsPedidos_Itens.Params.ParambyName('ID_PEDIDO').AsInteger := DM.cdsPedidosID_PEDIDO.AsInteger;
+//  dm.cdsPedidos_Itens.Open;
+
+  dm.cdsPedidos_Itens.close;
+  dm.cdsPedidos_Itens.Filtered := False;
+  dm.cdsPedidos_Itens.Filter := '';
+  dm.cdsPedidos_Itens.CommandText := 'SELECT * FROM PEDIDOS_ITENS where id_pedido = '+inttostr(dm.cdsPedidosID_PEDIDO.AsInteger) + ' ORDER BY ID_PEDIDO_ITEM';
   dm.cdsPedidos_Itens.Open;
   DM.cdsPedidos_Itens.First;
   vSubTotal := 0;
@@ -2142,7 +2332,7 @@ begin
                  'Qtde.: '+FloatToStr(dm.cdsPedidos_ItensQUANTIDADE.AsFloat) +'  X  '+
                  'R$: '+FormatFloat('###,###,##0.00',dm.cdsPedidos_ItensVALOR_UNITARIO.AsFloat) +
                  '  =  ' +'R$: '+FormatFloat('###,###,##0.00',dm.cdsPedidos_ItensVALOR_TOTAL.AsFloat) +
-                 ' - '+ FormatFloat('###,###,##0.00',StrToFloat(edtDesconto.Text))
+                 ' - '+ FormatFloat('###,###,##0.00',StrToFloat( stringReplace( edtDesconto.Text,'.','',[] ) ))
     else
       vString := '   '+DM.cdsPedidos_ItensDESCRICAO_PRODUTO.AsString +'   '+
                  'Qtde.: '+FloatToStr(dm.cdsPedidos_ItensQUANTIDADE.AsFloat) +'  X  '+
@@ -2154,7 +2344,7 @@ begin
     dm.cdsPedidos_Itens.Next;
   end;
   if edtDesconto.Text <> '' then  
-    edtSubTotal.Text := FormatFloat('###,###,##0.00',vSubTotal - StrToFloat(edtDesconto.Text))
+    edtSubTotal.Text := FormatFloat('###,###,##0.00',vSubTotal - StrToFloat( stringReplace( edtDesconto.Text,'.','',[] ) ))
   else
     edtSubTotal.Text := FormatFloat('###,###,##0.00',vSubTotal); 
          
@@ -2172,9 +2362,9 @@ end;
 procedure TfrmVendasBalcao.spbConfirmarVendaClick(Sender: TObject);
 var
   vString,vNome,vCpf,vEndereco,Aliquota,vPermiteTroco,
-  vEfetuaMovimentacaoCliente,vTexto,vTextoAux : string;
+  vEfetuaMovimentacaoCliente,vTexto,vTextoAux, Erro : string;
   vContador,vFormaPagamento,vContadorCPF:integer;
-  vSomaValorTotal,vValorPago,vLimiteCliente : Real;
+  vSomaValorTotal,vValorPago,vLimiteCliente, Troco, vdesc : Real;
   vConectaServidor : TDSModuleDbClient;
   iRetorno : integer;
   LookUp : TfrmLookUp;
@@ -2183,9 +2373,18 @@ var
   I: Integer;
   TotalItem,TotalGeralItem:Double;
   memo : TMemo;
+
 begin
+
   if vStatusVenda then
   begin
+    if (strtofloat( stringReplace( edtSubTotal.text,'.','',[] ) ) <= 0) then
+    BEGIN
+    MessageDlg('Não foi calculado o SubTotal'+#13+
+                 'Verifique a quantidade e o produto'+#13+
+                 'antes de confirmar venda',mtWarning,[mbOK],0);
+                 EXIT;
+    END;
     //ecf
     if frmLogin.pSat_ECF = 0 then
     begin
@@ -2197,6 +2396,7 @@ begin
       end;
       vContador := 0;
       vSomaValorTotal := 0;
+      vDesc:= 0;
       //DM.cdsPedidos_Itens.Close;
       //DM.cdsPedidos_Itens.CommandText := 'SELECT * FROM PEDIDOS_ITENS WHERE ID_PEDIDO = '+IntToStr(DM.cdsPedidosID_PEDIDO.AsInteger);
       //dm.cdsPedidos_Itens.Open;
@@ -2207,6 +2407,8 @@ begin
         vSomaValorTotal := vSomaValorTotal + dm.cdsPedidos_ItensVALOR_TOTAL.AsFloat;
         dm.cdsPedidos_Itens.Next;
       end;
+
+
       DM.cdsPedidos.Edit;
       dm.cdsPedidosVALOR_TOTAL.Value := vSomaValorTotal;
       dm.cdsPedidosSTATUS.Value := 'Realizado';
@@ -2233,6 +2435,7 @@ begin
       if not DM.cdsFormasDePagamento.Active then
         dm.cdsFormasDePagamento.Active := True;
       frmlookUpFormaPagamento.ShowModal;
+      troco:= frmlookUpFormaPagamento.vtroco;
       FreeAndNil(frmlookUpFormaPagamento);
 
       //Primeiro irei movimentar os produtos, caso não consiga
@@ -2403,6 +2606,7 @@ begin
                                                       DM.cdsPedidosID_PEDIDO.AsInteger,'D','Venda a vale','',DM.cdsPedidosVALOR_TOTAL_PEDIDO.AsFloat);
 
         }
+
         DM.cdsPedidos.Edit;
         dm.cdsPedidosVALOR_TOTAL.Value := vSomaValorTotal - dm.cdsPedidosVALOR_DESCONTO.Value;
         dm.cdsPedidosVALOR_TOTAL_PRODUTOS.Value := vSomaValorTotal;
@@ -2428,6 +2632,8 @@ begin
         vString := 'Valor Total dos Itens : '+FormatFloat('###,###,##0.00',vSomaValorTotal);
         cxMemo1.Lines.Add(vString);
         vString := 'Valor Total do Desconto : '+FormatFloat('###,###,##0.00',dm.cdsPedidosVALOR_DESCONTO.AsFloat);
+        cxMemo1.Lines.Add(vString);
+        vString := 'Valor Troco : '+FormatFloat('###,###,##0.00',Troco);
         cxMemo1.Lines.Add(vString);
         vString := 'Obrigado e Volte Sempre';
         cxMemo1.Lines.Add(vString);
@@ -2474,9 +2680,11 @@ begin
           ACBrSAT1.CFe.TamanhoIdentacao := 3;
           AjustarAcbrSat;
           ACBrSAT1.InicializaCFe ;
-
+          ACBrSAT1.Cfe.ide.numeroCaixa := 1;
+          ACBrSAT1.Cfe.ide.cNF := DM.cdsPedidosID_PEDIDO.AsInteger;
+          ACBrSAT1.CFe.RetirarAcentos:= true;
           DM.cdsgenerico.Close;
-          DM.cdsGenerico.CommandText :='SELECT TRIM(CPF) CPF FROM CLIENTES WHERE ID_CLIENTE = '+IntToStr(dm.cdsPedidosID_CLIENTE.AsInteger);
+          DM.cdsGenerico.CommandText :='SELECT TRIM(CPF) CPF, RAZAO_SOCIAL FROM CLIENTES WHERE ID_CLIENTE = '+IntToStr(dm.cdsPedidosID_CLIENTE.AsInteger);
           DM.cdsGenerico.Open;
           if RetirarPontosETracos( DM.cdsGenerico.FieldByName('CPF').Asstring) = '' then
           begin
@@ -2490,8 +2698,16 @@ begin
                   vCpf := Inputbox('Numero do CPF','Informe o nº do cpf/cnpj','');
                   if Length(vCpf) <= 11 then
                   begin
-                    if VerificaCPF(vCPF) then
-                      vCPFCorreto := True;
+                    if vCpf <> '' then
+                    begin
+                      if VerificaCPF(vCPF) then
+                        vCPFCorreto := True;
+                    end
+                    else
+                    begin
+                      vCpf := 'NAO INFORMADO';
+                      vCPFCorreto := False;
+                    end;
                   end
                   else
                   if (Length(vCpf) > 11) and (Length(vCpf) <= 14)  then
@@ -2510,11 +2726,11 @@ begin
                     else
                     begin
                       vCPFCorreto := False;
-                      showmessage('Cpf informado está incorreto.Por favor,digite novamente.'+#13+
-                                  'CPF informado ao sistema : '+vCpf+#13+
+                      showmessage('CPF/CNPJ informado está incorreto.Por favor,digite novamente.'+#13+
+                                  'CPF/CNPJ informado ao sistema : '+vCpf+#13+
                                   'Você possui 3 Tentativas para digitar corretamente o numero'+#13+
-                                  'do cpf. Ainda restam '+IntToStr(3 - vContadorCPF)+' tentativas'+#13+
-                                  'após 3 tentativas, o sistema não irá preencher o cpf para esta venda');
+                                  'do CPF/CNPJ. Ainda restam '+IntToStr(3 - vContadorCPF)+' tentativas'+#13+
+                                  'após 3 tentativas, o sistema não irá preencher o CPF/CNPJ para esta venda');
                     end;
                   end;
                 until (vCPFCorreto);
@@ -2560,26 +2776,41 @@ begin
           end;
           if vCpf <> 'NAO INFORMADO' then
           begin
+            ACBrSAT1.CFe.Dest.xNome:= DM.cdsGenerico.FieldByName('RAZAO_SOCIAL').Asstring;
             ACBrSAT1.CFe.Dest.CNPJCPF := vCpf;
           end;
+
+          if ACBrSAT1.CFe.Dest.xNome = '' then
+          begin
+            DM.cdsgenerico.Close;
+            DM.cdsGenerico.CommandText := 'SELECT TRIM(CPF) CPF, RAZAO_SOCIAL FROM CLIENTES WHERE ID_CLIENTE = '+IntToStr(frmlogin.pClintePadrao);
+            DM.cdsGenerico.Open;
+            if ACBrSAT1.CFe.Dest.xNome = '' then
+            begin
+              ACBrSAT1.CFe.Dest.xNome:= DM.cdsGenerico.FieldByName('RAZAO_SOCIAL').Asstring;
+              if DM.cdsGenerico.FieldByName('CPF').Asstring <> '' then
+                ACBrSAT1.CFe.Dest.CNPJCPF := DM.cdsGenerico.FieldByName('CPF').Asstring;
+            end;
+          end;
+
           //Verificando se os campos basicos estao preenchidos
           DM.cdsgenerico.Close;
-          DM.cdsGenerico.CommandText := 'select' + #13#10 +
-                                        'pit.DESCRICAO_PRODUTO,' + #13#10 +
-                                        'prod.cfop,' + #13#10 +
-                                        'prod.unidade,' + #13#10 +
-                                        'prod.codigo_ncm' + #13#10 +
-                                        'from pedidos_itens pit' + #13#10 +
-                                        'inner join produtos prod on prod.pro_id=pit.id_produto' + #13#10 +
-                                        'where pit.id_pedido = '+ IntToStr(dm.cdsPedidosID_PEDIDO.AsInteger) + #13#10 +
-                                        'and' + #13#10 +
-                                        '(prod.cfop is null or' + #13#10 +
-                                        'prod.unidade is null or' + #13#10 +
-                                        'prod.codigo_ncm like ''%000%'')';
+          DM.cdsGenerico.CommandText := 'select ' + #13#10 +
+                                        ' pit.DESCRICAO_PRODUTO, ' + #13#10 +
+                                        ' prod.cfop, ' + #13#10 +
+                                        ' prod.unidade, ' + #13#10 +
+                                        ' prod.codigo_ncm ' + #13#10 +
+                                        ' from pedidos_itens pit ' + #13#10 +
+                                        ' inner join produtos prod on prod.pro_id=pit.id_produto ' + #13#10 +
+                                        ' where pit.id_pedido = '+ IntToStr(dm.cdsPedidosID_PEDIDO.AsInteger) + #13#10 +
+                                        '   and ' + #13#10 +
+                                        ' (prod.cfop is null or ' + #13#10 +
+                                        ' prod.unidade is null ' + #13#10 +
+                                        ')';
           DM.cdsGenerico.Open;
-          if DM.cdsGenerico.RecordCount > 0 then
+          DM.cdsGenerico.First;
+          if (DM.cdsGenerico.RecordCount > 0) and (not DM.cdsGenerico.eof) then
           begin
-            DM.cdsGenerico.First;
             vTexto := '';
             vTextoAux := '';
             while not DM.cdsGenerico.eof do
@@ -2593,10 +2824,6 @@ begin
               begin
                 vTextoAux := vTextoAux + 'UNIDADE'+#13#10;
               end;
-              if DM.cdsGenerico.FieldByName('codigo_ncm').AsString = '' then
-              begin
-                vTextoAux := vTextoAux + 'CÓDIGO NCM'+#13#10;
-              end;
               vTexto :=  vTexto +#13#10+vTextoAux;
               DM.cdsGenerico.Next;
             end;
@@ -2606,30 +2833,51 @@ begin
             Abort;
           end;
           // Montando uma Venda //
-          DM.cdsPedidos_Itens.First;
+
           vContador := 0;
           vSomaValorTotal := 0;
           TotalGeralItem := 0;
 
+          DM.cdsPedidos_Itens.First;
           while not DM.cdsPedidos_Itens.Eof do
           begin
             Inc(vContador);
             vSomaValorTotal := vSomaValorTotal + DM.cdsPedidos_ItensVALOR_TOTAL.AsFloat;
             with ACBrSAT1.CFe do
             begin
-              with Det.Add do
+              with Det.New do
               begin
                 DM.cdsGenerico.Close;
-                dm.cdsGenerico.CommandText := 'select first 1 '+#13+
-                                              'produtos.pro_codigo,'+#13+
-                                              'produtos.pro_ean13,'+#13+
-                                              'produtos.codigo_ncm,'+#13+
-                                              'produtos.unidade,'+#13+
-                                              'produtos.CFOP'+#13+
-                                              'from produtos'+#13+
-                                              'where produtos.COD_PROD = '+IntToStr(DM.cdsPedidos_ItensID_PRODUTO.AsInteger)+
-                                              ' and produtos.PRO_CODIGO = '+QuotedStr( DM.cdsPedidos_ItensCodigo.AsString);
+                dm.cdsGenerico.CommandText := ' select first 1 '+#13+
+                                              ' produtos.pro_codigo, '+#13+
+                                              ' produtos.pro_ean13, '+#13+
+                                              ' produtos.codigo_ncm, '+#13+
+                                              ' produtos.unidade, '+#13+
+                                              ' produtos.CFOP '+#13+
+                                              ' from produtos '+#13+
+                                              ' where 1 = 1 ' +#13;
+
+                if (DM.cdsPedidos_ItensID_PRODUTO.AsInteger > 0) then
+                  dm.cdsGenerico.CommandText := dm.cdsGenerico.CommandText +' and produtos.COD_PROD = '+IntToStr(DM.cdsPedidos_ItensID_PRODUTO.AsInteger);
+                if (DM.cdsPedidos_ItensCodigo.AsString <> '') then
+                  dm.cdsGenerico.CommandText := dm.cdsGenerico.CommandText +'  and produtos.PRO_CODIGO = '+QuotedStr( DM.cdsPedidos_ItensCodigo.AsString);
                 DM.cdsGenerico.Open;
+
+                if (DM.cdsGenerico.Recordcount <= 0) then
+                begin
+                  DM.cdsGenerico.Close;
+                  dm.cdsGenerico.CommandText := ' select first 1 '+#13+
+                                              ' produtos.pro_codigo, '+#13+
+                                              ' produtos.pro_ean13, '+#13+
+                                              ' produtos.codigo_ncm, '+#13+
+                                              ' produtos.unidade, '+#13+
+                                              ' produtos.CFOP '+#13+
+                                              ' from produtos '+#13+
+                                              ' where 1 = 1 ' +#13+
+                                              ' and produtos.pro_id = '+ IntToStr(DM.cdsPedidos_ItensID_PRODUTO.AsInteger);
+                  DM.cdsGenerico.Open;
+                end;
+
 
                 nItem := vContador;
                 Prod.cProd := DM.cdsGenerico.FieldByName('pro_codigo').AsString;
@@ -2637,15 +2885,17 @@ begin
                 Prod.xProd := copy(DM.cdsPedidos_ItensDESCRICAO_PRODUTO.AsString,1,120);
                 prod.NCM := RetirarPontosETracos(DM.cdsGenerico.FieldByName('codigo_ncm').AsString);
                 Prod.CFOP := DM.cdsGenerico.FieldByName('CFOP').AsString;
-                Prod.uCom := DM.cdsGenerico.FieldByName('unidade').AsString;;
+                Prod.uCom := DM.cdsGenerico.FieldByName('unidade').AsString;
                 Prod.qCom := DM.cdsPedidos_ItensQUANTIDADE.AsFloat;
                 Prod.vUnCom := DM.cdsPedidos_ItensVALOR_UNITARIO.AsFloat;
                 Prod.indRegra := irTruncamento;
                 Prod.vDesc := DM.cdsPedidos_ItensDESCONTO.AsFloat;
+                vDesc:=vDesc + DM.cdsPedidos_ItensDESCONTO.AsFloat;
+                //Showmessage( DM.cdsGenerico.FieldByName('CFOP').AsString + ' - ' +DM.cdsGenerico.FieldByName('unidade').AsString);
 
-                TotalItem := (Prod.qCom * Prod.vUnCom);
+                TotalItem := RoundABNT((Prod.qCom * Prod.vUnCom) + Prod.vOutro - Prod.vDesc,-2);
                 Imposto.vItem12741 := TotalItem * frmLogin.pAliqIcm;
-                TotalGeralItem := TotalGeralItem + (TotalItem * frmLogin.pAliqIcm);
+                TotalGeralItem := RoundABNT(TotalGeralItem + (TotalItem * frmLogin.pAliqIcm),-2);
                 Imposto.ICMS.orig := oeNacional;
                 Imposto.ICMS.CSOSN := csosn102;
 
@@ -2662,8 +2912,6 @@ begin
             end;
             DM.cdsPedidos_Itens.Next;
           end;
-          ACBrSAT1.CFe.Total.vCFeLei12741 := TotalGeralItem;
-
           DM.cdsPedidos.Edit;
           dm.cdsPedidosVALOR_TOTAL.Value := vSomaValorTotal;
           DM.cdsPedidos.Post;
@@ -2676,6 +2924,7 @@ begin
           if not DM.cdsFormasDePagamento.Active then
             dm.cdsFormasDePagamento.Active := True;
 
+
           frmlookUpFormaPagamento.ShowModal;
           if not frmlookUpFormaPagamento.vContinua then
           begin
@@ -2687,12 +2936,13 @@ begin
           dm.cdsPedidos_Formas_Condicoes.First;
           while not dm.cdsPedidos_Formas_Condicoes.Eof do
           begin
-            with ACBrSAT1.CFe.Pagto.Add do
+            with ACBrSAT1.CFe.Pagto.New do
             begin
               if (AnsiUpperCase(dm.cdsPedidos_Formas_CondicoesDESCRICAO_FORMA_DE_PAGAMENTO.AsString) = 'DINHEIRO') AND (dm.cdsPedidos_Formas_CondicoesVALOR.AsFloat > 0) then
               begin
                 cMP := MPDinheiro;
                 vMP := dm.cdsPedidos_Formas_CondicoesVALOR.AsFloat;
+                ACBrSAT1.CFe.Pagto.vTroco:= frmlookUpFormaPagamento.vtroco;
               end
               else
               if (AnsiUpperCase(dm.cdsPedidos_Formas_CondicoesDESCRICAO_FORMA_DE_PAGAMENTO.AsString) = 'CREDITO') AND (dm.cdsPedidos_Formas_CondicoesVALOR.AsFloat > 0) then
@@ -2717,7 +2967,11 @@ begin
             end;
             dm.cdsPedidos_Formas_Condicoes.Next;
           end;
-          ACBrSAT1.CFe.InfAdic.infCpl := 'Business Controller';
+
+
+          ACBrSAT1.CFe.InfAdic.infCpl := ' ';
+
+          ACBrSAT1.CFe.Total.vCFeLei12741 := TotalGeralItem;
           ACBrSAT1.CFe.Total.DescAcrEntr.vDescSubtot :=  dm.cdsPedidosVALOR_DESCONTO.AsFloat;
 
           DM.cdsPedidos.Edit;
@@ -2726,29 +2980,62 @@ begin
           DM.cdsPedidosPEDIDO_EM_VENDA.Value := 'S';
           DM.cdsPedidos.Post;
 
-          //
           memo := TMemo.Create(Self);
           memo.Parent := Self.Parent;
-          memo.Visible := False;
+          mVendaEnviar.Visible := true;
           memo.Left := -1000;
-          memo.Lines.Text := ACBrSAT1.CFe.GerarXML( True );    // True = Gera apenas as TAGs da aplicação
+          memo.Lines.Text := ACBrSAT1.CFe.GerarXML( True );
+         // mVendaEnviar.Clear;
+
+          //mVendaEnviar.Lines.Text := ACBrSAT1.CFe.GerarXML( True );
+
+          //mVendaEnviar.Lines.SaveToFile(ExtractFilePath(Application.ExeName)+'\Pedido-'+IntToStr(DM.cdsPedidosID_PEDIDO.AsInteger)+'CFe-'+IntToStrZero(ACBrSAT1.numeroSessao,6)+'.xml');
+
+          //   mVendaEnviar.Lines.Clear;
+          //  mVendaEnviar.Lines.Text := ACBrSAT1.CFe.AsXMLString;
+          //  mVendaEnviar.Lines.SaveToFile(ExtractFilePath(Application.ExeName)+'Res\Pedido-'+IntToStr(DM.cdsPedidosID_PEDIDO.AsInteger)+' CFe-'+ACBrSAT1.CFe.infCFe.ID+'-rec.xml');
+
+          //GeraVenda(Ememo.Text);    // True = Gera apenas as TAGs da aplicação
+          //Showmessage('test');
+
+          //if ACBrSAT1.Inicializado then
+          //begin
+          //  Showmessage('Inicializado!')
+
+          //end
+          //else
+          //begin
+          //  Showmessage('Desinicializado!');
+          //  ACBrSAT1.Inicializar;
+          //end;
+
+
+          //if not ACBrSAT1.ValidarDadosVenda( mVendaEnviar.Text, Erro ) then
+          //begin
+          //   Showmessage('Erro ao efetuar venda'+#13+Erro);
+          //   exit;
+          //end;
+          //ACBrSAT1.Inicializado := not ACBrSAT1.Inicializado ;
+
 
           ACBrSAT1.EnviarDadosVenda( memo.Text);
+
           if ACBrSAT1.Resposta.codigoDeRetorno = 6000 then
           begin
-            ForceDirectories(ExtractFilePath(Application.ExeName)+'Env');
-            ForceDirectories(ExtractFilePath(Application.ExeName)+'Res');
-            memo.Lines.SaveToFile(ExtractFilePath(Application.ExeName)+'Env\Pedido-'+IntToStr(DM.cdsPedidosID_PEDIDO.AsInteger)+' CFe-'+IntToStrZero(ACBrSAT1.numeroSessao,6)+'.xml');
+            //ForceDirectories(ExtractFilePath(Application.ExeName)+'Env');
+            //ForceDirectories(ExtractFilePath(Application.ExeName)+'Res');
+            //mVendaEnviar.Lines.SaveToFile(ExtractFilePath(Application.ExeName)+'Env\Pedido-'+IntToStr(DM.cdsPedidosID_PEDIDO.AsInteger)+' CFe-'+IntToStrZero(ACBrSAT1.numeroSessao,6)+'.xml');
 
             memo.Lines.Clear;
             memo.Lines.Text := ACBrSAT1.CFe.AsXMLString;
             memo.Lines.SaveToFile(ExtractFilePath(Application.ExeName)+'Res\Pedido-'+IntToStr(DM.cdsPedidosID_PEDIDO.AsInteger)+' CFe-'+ACBrSAT1.CFe.infCFe.ID+'-rec.xml');
 
+            (*ACBrPosPrinter1.Desativar;
             ACBrPosPrinter1.Device.Baud := 115200;
             ACBrPosPrinter1.ColunasFonteNormal := 48;
-            ACBrPosPrinter1.EspacoEntreLinhas := 0;
+            ACBrPosPrinter1.EspacoEntreLinhas := 0;*)
             // ACBrPosPrinter1.Buffer := 0;
-            ACBrPosPrinter1.LinhasEntreCupons := 0;
+            (*ACBrPosPrinter1.LinhasEntreCupons := 0;
             ACBrPosPrinter1.ConfigQRCode.Tipo := 2;
             ACBrPosPrinter1.ConfigQRCode.LarguraModulo := 4;
             ACBrPosPrinter1.ConfigQRCode.ErrorLevel := 0;
@@ -2759,9 +3046,32 @@ begin
             ACBrPosPrinter1.ConfigBarras.LarguraLinha := 0;
             ACBrPosPrinter1.ConfigBarras.Altura := 0;
             ACBrPosPrinter1.ConfigBarras.MostrarCodigo := False;
-            GerarCupomSat(memo);
-            ACBrPosPrinter1.Imprimir(memo.Text);
-            //            ACBrSAT1.ImprimirExtrato;
+            ACBrSATExtratoESCPOS1.ImprimeQRCode := True;*)
+            //GerarCupomSat(mVendaEnviar);
+            //ACBrPosPrinter1.Imprimir(mVendaEnviar.Text);
+
+            //ACBrSATExtratoFortes1.
+            ACBrSATExtratoFortes1.Impressora:= GetImpressora;
+            //ACBrSATExtratoFortes1.Margens.Esquerda:= 2;
+            //ACBrSATExtratoFortes1.Margens.Direita:= 2;
+            //ACBrSATExtratoFortes1.LarguraBobina:= 286;
+
+            ACBrSATExtratoFortes1.LarguraBobina       := 286;
+            ACBrSATExtratoFortes1.MargemSuperior        := 0;
+            ACBrSATExtratoFortes1.MargemInferior      := 0;
+            ACBrSATExtratoFortes1.MargemEsquerda := 5;
+            ACBrSATExtratoFortes1.MargemDireita      := 1;
+
+
+            ACBrSAT1.Extrato := ACBrSATExtratoFortes1;
+            ACBrSAT1.Extrato.ImprimeQRCode:= true;
+            ACBrSAT1.Extrato.ImprimeMsgOlhoNoImposto:= true;
+            ACBrSAT1.Extrato.ImprimeDescAcrescItem:= true;
+            ACBrSAT1.Extrato.Sistema:= 'Business Controller';
+            //showmessage('aqui');
+            //ACBrSATExtratoFortes1.MostrarPreview   := true;
+            ACBrSAT1.ImprimirExtrato;
+
             dm.cdsPedidos.Edit;
             dm.cdsPedidosSTATUS.Value := 'Realizado';
             DM.cdsPedidosNUMEROCUPOMFISCAL.AsString := IntToStr(ACBrSAT1.CFe.ide.cNF);
@@ -2788,6 +3098,7 @@ begin
 
             DM.cdsPedidos.ApplyUpdates(0);
             dm.cdsPedidos_Itens.ApplyUpdates(0);
+
             if Length(aIdentificadoresPedido) > 0 then
             begin
               for I := 0 to Length(aIdentificadoresPedido)-1 do
@@ -2814,7 +3125,7 @@ begin
             edtPreco.Clear;
             edtPrecoTotal.Clear;
             edtDesconto.Clear;
-            edtPesquisa.SetFocus;
+            //edtPesquisa.SetFocus;
             vStatusVenda := False;
             edtSubTotal.Text := '0,00';
             //      Sleep(1000);
@@ -2828,6 +3139,8 @@ begin
             inttostr(ACBrSAT1.Resposta.codigoDeErro)+ACBrSAT1.Resposta.RetornoStr+#13+
             inttostr(ACBrSAT1.Resposta.codigoSEFAZ)+ACBrSAT1.Resposta.mensagemSEFAZ+#13+
             inttostr(ACBrSAT1.Resposta.codigoDeRetorno)+'-'+ACBrSAT1.Resposta.mensagemRetorno,mtConfirmation,[mbOk],0);
+            vTipoVenda := '';
+            cxMemo1.Lines.Clear;
           end;
           if memo.Lines.Count < 1 then
           begin
@@ -2853,6 +3166,7 @@ begin
           FreeAndNil(vConectaServidor);
         end;
         FreeAndNil(frmlookUpFormaPagamento);
+
       end;
     end;
   end
@@ -2886,11 +3200,10 @@ begin
 end;
 
 procedure TfrmVendasBalcao.spbImprimirCupomClick(Sender: TObject);
-var
-  iRetorno : integer;
-  vString,vString2,vString3:string;
+//var
+//  iRetorno : integer;
+//  vString,vString2,vString3:string;
 begin
-  
  //ACBrECF1.VendeItem('1232','Teste','00,00',10,10,0,'pç','','D');
   //ACBrECF1.FechaCupom('fechou',0);
 end;

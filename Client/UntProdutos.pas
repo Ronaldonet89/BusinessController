@@ -756,22 +756,22 @@ begin
         DM.cdsGenerico.Params.ParambyName('ORIGEM_MERCADORIA').AsString:= '0';
         DM.cdsGenerico.Execute;
 
-        Dm.FDQNFE.Close;
-        Dm.FDQNFE.SQL.clear;
-        Dm.FDQNFE.SQL.text:= '  UPDATE PRODUTO SET DESCRICAO = :DESCRICAO, ESTOQUE = :ESTOQUE,PRECO = :PRECO'+
-                             ' WHERE CODIGO = '+quotedstr(Dm.FDQConsulta.FieldByName('Codigo').AsString);
-
-        Dm.FDQNFE.ParambyName('DESCRICAO').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('produto').AsString,1,255);
-        Dm.FDQNFE.ParambyName('ESTOQUE').ASFLOAT:=  Dm.FDQConsulta.FieldByName('qtd').AsFloat;
-        Dm.FDQNFE.ParambyName('PRECO').ASFLOAT:=  Dm.FDQConsulta.FieldByName('preco').AsFloat;
-        Dm.FDQNFE.ExecSQL;
+//        Dm.FDQNFE.Close;
+//        Dm.FDQNFE.SQL.clear;
+//        Dm.FDQNFE.SQL.text:= '  UPDATE PRODUTO SET DESCRICAO = :DESCRICAO, ESTOQUE = :ESTOQUE,PRECO = :PRECO'+
+//                             ' WHERE CODIGO = '+quotedstr(Dm.FDQConsulta.FieldByName('Codigo').AsString);
+//
+//        Dm.FDQNFE.ParambyName('DESCRICAO').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('produto').AsString,1,255);
+//        Dm.FDQNFE.ParambyName('ESTOQUE').ASFLOAT:=  Dm.FDQConsulta.FieldByName('qtd').AsFloat;
+//        Dm.FDQNFE.ParambyName('PRECO').ASFLOAT:=  Dm.FDQConsulta.FieldByName('preco').AsFloat;
+//        Dm.FDQNFE.ExecSQL;
       end
       else
       begin
         Dm.cdsGenerico.Close;
         DM.cdsGenerico.CommandText := 'INSERT INTO PRODUTOS '+
-        '(PRO_ID, COD_PROD, PRO_CODIGO, PRO_DESCRICAO, PRO_SALDO, PRECO_VENDA, UNIDADE, COR, TAMANHO,ORIGEM_MERCADORIA,CODIGO_NCM,CFOP) '+
-        ' VALUES (GEN_ID(NOVO_PRODUTO, 1), :COD_PROD, :PRO_CODIGO,:PRO_DESCRICAO,:PRO_SALDO,:PRECO_VENDA,:UNIDADE,:COR,:TAMANHO,:ORIGEM_MERCADORIA,''7113.20.00'',''5102'')';
+        '(PRO_ID, COD_PROD, PRO_CODIGO, PRO_DESCRICAO, PRO_SALDO, PRECO_VENDA, UNIDADE, PRO_EAN13, COR, TAMANHO,ORIGEM_MERCADORIA,CODIGO_NCM,CFOP) '+
+        ' VALUES (GEN_ID(NOVO_PRODUTO, 1), :COD_PROD, :PRO_CODIGO,:PRO_DESCRICAO,:PRO_SALDO,:PRECO_VENDA,:UNIDADE,:PRO_EAN13,:COR,:TAMANHO,:ORIGEM_MERCADORIA,''7113.20.00'',''5102'')';
 
         DM.cdsGenerico.Params.ParambyName('COD_PROD').AsInteger:= Dm.FDQConsulta.FieldByName('Cod_prod').AsInteger;
         DM.cdsGenerico.Params.ParambyName('PRO_CODIGO').AsString:= Dm.FDQConsulta.FieldByName('Codigo').AsString;
@@ -779,48 +779,49 @@ begin
         DM.cdsGenerico.Params.ParambyName('PRO_SALDO').AsFloat:= Dm.FDQConsulta.FieldByName('qtd').AsFloat;
         DM.cdsGenerico.Params.ParambyName('PRECO_VENDA').AsFloat:= Dm.FDQConsulta.FieldByName('preco').AsFloat;
         DM.cdsGenerico.Params.ParambyName('UNIDADE').AsString:= 'PC';
+        DM.cdsGenerico.Params.ParambyName('PRO_EAN13').AsString:= 'SEM GTIN';
         DM.cdsGenerico.Params.ParambyName('COR').AsString:= Copy(Dm.FDQConsulta.FieldByName('Cor').AsString,1,50);
         DM.cdsGenerico.Params.ParambyName('TAMANHO').AsString:= Copy(Dm.FDQConsulta.FieldByName('tamanho').AsString,1,80);
         DM.cdsGenerico.Params.ParambyName('ORIGEM_MERCADORIA').AsString:= '0';
         DM.cdsGenerico.Execute;
 
-        Dm.FDQNFE.Close;
-        Dm.FDQNFE.SQL.clear;
-        Dm.FDQNFE.SQL.text:= 'SELECT coalesce(MAX(ID),0)+ 1 AS ID FROM PRODUTO';
-        Dm.FDQNFE.Open;
-
-        id:= Dm.FDQNFE.FieldByName('ID').ASINTEGER;
-
-        Dm.FDQNFE.Close;
-        Dm.FDQNFE.SQL.clear;
-        Dm.FDQNFE.SQL.text:= 'SELECT count(ID) cont FROM PRODUTO WHERE CODIGO = '+quotedstr(Dm.FDQConsulta.FieldByName('Codigo').AsString);
-        Dm.FDQNFE.Open;
-
-        cont:= Dm.FDQNFE.FieldByName('cont').ASINTEGER;
-
-        if cont <= 0 then
-        begin
-          Dm.FDQNFE.Close;
-          Dm.FDQNFE.SQL.clear;
-          Dm.FDQNFE.SQL.text:= '  INSERT INTO PRODUTO (ID,ID_GRUPO,ID_SUBGRUPO,ID_TRIBUTACAO,CODIGO,DESCRICAO,ESTOQUE,PRECO,UNIDADE,ORIGEM,UTRIB,NCM,TIPO,SITUACAO) '+
-                               '  VALUES (:ID,:ID_GRUPO,:ID_SUBGRUPO,:ID_TRIBUTACAO,:CODIGO,:DESCRICAO,:ESTOQUE,:PRECO,:UNIDADE,:ORIGEM,:UTRIB,:NCM,:TIPO,:SITUACAO)';
-
-          Dm.FDQNFE.ParambyName('ID').ASINTEGER:= id;
-          Dm.FDQNFE.ParambyName('ID_GRUPO').ASINTEGER:=  1;
-          Dm.FDQNFE.ParambyName('ID_SUBGRUPO').ASINTEGER:= 1;
-          Dm.FDQNFE.ParambyName('ID_TRIBUTACAO').ASINTEGER:= 1;
-          Dm.FDQNFE.ParambyName('CODIGO').ASSTRING:= Dm.FDQConsulta.FieldByName('Codigo').AsString;
-          Dm.FDQNFE.ParambyName('DESCRICAO').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('produto').AsString,1,255);
-          Dm.FDQNFE.ParambyName('ESTOQUE').ASFLOAT:=  Dm.FDQConsulta.FieldByName('qtd').AsFloat;
-          Dm.FDQNFE.ParambyName('PRECO').ASFLOAT:=  Dm.FDQConsulta.FieldByName('preco').AsFloat;
-          Dm.FDQNFE.ParambyName('UNIDADE').ASSTRING:= 'PC';
-          Dm.FDQNFE.ParambyName('ORIGEM').ASINTEGER:= 0;
-          Dm.FDQNFE.ParambyName('UTRIB').ASSTRING:=  'PC';
-          Dm.FDQNFE.ParambyName('NCM').ASSTRING:= '71132000';
-          Dm.FDQNFE.ParambyName('TIPO').ASINTEGER:= 0;
-          Dm.FDQNFE.ParambyName('SITUACAO').ASINTEGER:= 0;
-          Dm.FDQNFE.ExecSQL;
-        end;
+//        Dm.FDQNFE.Close;
+//        Dm.FDQNFE.SQL.clear;
+//        Dm.FDQNFE.SQL.text:= 'SELECT coalesce(MAX(ID),0)+ 1 AS ID FROM PRODUTO';
+//        Dm.FDQNFE.Open;
+//
+//        id:= Dm.FDQNFE.FieldByName('ID').ASINTEGER;
+//
+//        Dm.FDQNFE.Close;
+//        Dm.FDQNFE.SQL.clear;
+//        Dm.FDQNFE.SQL.text:= 'SELECT count(ID) cont FROM PRODUTO WHERE CODIGO = '+quotedstr(Dm.FDQConsulta.FieldByName('Codigo').AsString);
+//        Dm.FDQNFE.Open;
+//
+//        cont:= Dm.FDQNFE.FieldByName('cont').ASINTEGER;
+//
+//        if cont <= 0 then
+//        begin
+//          Dm.FDQNFE.Close;
+//          Dm.FDQNFE.SQL.clear;
+//          Dm.FDQNFE.SQL.text:= '  INSERT INTO PRODUTO (ID,ID_GRUPO,ID_SUBGRUPO,ID_TRIBUTACAO,CODIGO,DESCRICAO,ESTOQUE,PRECO,UNIDADE,ORIGEM,UTRIB,NCM,TIPO,SITUACAO) '+
+//                               '  VALUES (:ID,:ID_GRUPO,:ID_SUBGRUPO,:ID_TRIBUTACAO,:CODIGO,:DESCRICAO,:ESTOQUE,:PRECO,:UNIDADE,:ORIGEM,:UTRIB,:NCM,:TIPO,:SITUACAO)';
+//
+//          Dm.FDQNFE.ParambyName('ID').ASINTEGER:= id;
+//          Dm.FDQNFE.ParambyName('ID_GRUPO').ASINTEGER:=  1;
+//          Dm.FDQNFE.ParambyName('ID_SUBGRUPO').ASINTEGER:= 1;
+//          Dm.FDQNFE.ParambyName('ID_TRIBUTACAO').ASINTEGER:= 1;
+//          Dm.FDQNFE.ParambyName('CODIGO').ASSTRING:= Dm.FDQConsulta.FieldByName('Codigo').AsString;
+//          Dm.FDQNFE.ParambyName('DESCRICAO').ASSTRING:= Copy(Dm.FDQConsulta.FieldByName('produto').AsString,1,255);
+//          Dm.FDQNFE.ParambyName('ESTOQUE').ASFLOAT:=  Dm.FDQConsulta.FieldByName('qtd').AsFloat;
+//          Dm.FDQNFE.ParambyName('PRECO').ASFLOAT:=  Dm.FDQConsulta.FieldByName('preco').AsFloat;
+//          Dm.FDQNFE.ParambyName('UNIDADE').ASSTRING:= 'PC';
+//          Dm.FDQNFE.ParambyName('ORIGEM').ASINTEGER:= 0;
+//          Dm.FDQNFE.ParambyName('UTRIB').ASSTRING:=  'PC';
+//          Dm.FDQNFE.ParambyName('NCM').ASSTRING:= '71132000';
+//          Dm.FDQNFE.ParambyName('TIPO').ASINTEGER:= 0;
+//          Dm.FDQNFE.ParambyName('SITUACAO').ASINTEGER:= 0;
+//          Dm.FDQNFE.ExecSQL;
+//        end;
       end;
       inc(prod);
       Gauge1.Progress := prod;

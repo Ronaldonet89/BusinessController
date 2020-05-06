@@ -21,7 +21,7 @@ uses
   dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust,
   dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinValentine, dxSkinVS2010,
   dxSkinWhiteprint, dxSkinXmas2008Blue, cxNavigator, Vcl.Imaging.pngimage,
-  cxContainer, cxLabel;
+  cxContainer, cxLabel, System.UITypes;
 
 type
   TfrmPagar = class(TForm)

@@ -21,7 +21,7 @@ uses
   dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus,
   dxSkinSilver, dxSkinSpringTime, dxSkinStardust, dxSkinSummer2008,
   dxSkinTheAsphaltWorld, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint,
-  dxSkinXmas2008Blue, cxNavigator, Vcl.Imaging.pngimage, cxContainer, cxLabel;
+  dxSkinXmas2008Blue, cxNavigator, Vcl.Imaging.pngimage, cxContainer, cxLabel,System.UITypes;
 
 type
   TfrmReceber = class(TForm)
@@ -37,7 +37,6 @@ type
     DBEdit5: TDBEdit;
     Panel1: TPanel;
     DBEdit7: TDBEdit;
-    DBEdit8: TDBEdit;
     cxGridReceberDBTableView1ID_RECEBER: TcxGridDBColumn;
     cxGridReceberDBTableView1DESCRICAO_TITULO: TcxGridDBColumn;
     cxGridReceberDBTableView1VALOR_TITULO: TcxGridDBColumn;
@@ -59,11 +58,11 @@ type
     cxButton1: TcxButton;
     DBEdit9: TDBEdit;
     cxLabel10: TcxLabel;
-    cxGridReceberDBTableView1Column1: TcxGridDBColumn;
     spbVoltarStatusPendente: TSpeedButton;
     spbCancelarTitulo: TSpeedButton;
     cxButton2: TcxButton;
     cxGridReceberDBTableView1NOME_CLIENTE: TcxGridDBColumn;
+    DBComboBox1: TDBComboBox;
     procedure FormShow(Sender: TObject);
     procedure spbConfirmarPagamentoClick(Sender: TObject);
     procedure cxGridReceberDBTableView1CustomDrawCell(Sender: TcxCustomGridTableView;
@@ -142,25 +141,33 @@ var
   Status: string;
 begin
 
-  try
-    Status := VarAsType(cxGridReceberDBTableView1.ViewData.Records[AViewInfo.GridRecord.Index].Values[cxGridReceberDBTableView1STATUS.Index], varString );
-  except
-    Status := '';
-  end;
-
-  if Status <> '' then
+  if dm.cdsReceber.RecordCount > 0 then
   begin
-    if Status  = 'Aguardando recebimento' then
-      ACanvas.Font.Color := clBlue;
+    if dm.cdsReceberSTATUS.AsString <> '' then
+    begin
 
-    if Status  = 'Titulo vencido' then
-      ACanvas.Font.Color := clRed;
+      try
+        if VarAsType(cxGridReceberDBTableView1.ViewData.Records[AViewInfo.GridRecord.Index].Values[cxGridReceberDBTableView1STATUS.Index], varString ) <> null then
+          Status := VarAsType(cxGridReceberDBTableView1.ViewData.Records[AViewInfo.GridRecord.Index].Values[cxGridReceberDBTableView1STATUS.Index], varString );
+      except
+        Status := '';
+      end;
 
-    if Status  = 'Titulo recebido' then
-      ACanvas.Font.Color := clGreen;
+      if Status <> '' then
+      begin
+        if Status  = 'Aguardando recebimento' then
+          ACanvas.Font.Color := clBlue;
 
-    if Status  = 'Titulo cancelado' then
-      ACanvas.Font.Color := clSilver;
+        if Status  = 'Titulo vencido' then
+          ACanvas.Font.Color := clRed;
+
+        if Status  = 'Titulo recebido' then
+          ACanvas.Font.Color := clGreen;
+
+        if Status  = 'Titulo cancelado' then
+          ACanvas.Font.Color := clSilver;
+      end;
+    end;
   end;
 
 end;
@@ -189,11 +196,25 @@ begin
   end;
   if AButtonIndex = 10 then
   begin
-    if dm.cdsReceberVENCIMENTO.IsNull then
+
+    if dm.cdsReceberVENCIMENTO.AsDateTime = null then
     begin
       messagedlg('Não foi preenchido o campo data de vencimento',mtError,[mbOK],0);
       abort;
     end;
+
+    if dm.cdsReceberSTATUS.AsString = '' then
+    begin
+      messagedlg('Não foi preenchido o campo status',mtError,[mbOK],0);
+      abort;
+    end;
+
+    if dm.cdsReceberVALOR_TITULO.AsFloat = 0 then
+    begin
+      messagedlg('Não foi preenchido o campo Vslor',mtError,[mbOK],0);
+      abort;
+    end;
+
     if dm.cdsReceberVENCIMENTO.AsDateTime < date then
       dm.cdsReceberSTATUS.AsString := 'Titulo vencido'
     else
@@ -203,13 +224,10 @@ end;
 
 procedure TfrmReceber.FormShow(Sender: TObject);
 begin
-  if not DM.cdsReceber.active then
-    DM.cdsReceber.active := true
-  else
-  begin
+
     DM.cdsReceber.Close;
     DM.cdsReceber.Open;
-  end;
+
 end;
 
 procedure TfrmReceber.spbCancelarTituloClick(Sender: TObject);
@@ -243,8 +261,8 @@ begin
 end;
 
 procedure TfrmReceber.spbConfirmarPagamentoClick(Sender: TObject);
-var
-  vIdReceber : integer;
+//var
+  //vIdReceber : integer;
 begin
   if DM.cdsReceber.RecordCount = 0 then
   begin
